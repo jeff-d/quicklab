@@ -1,5 +1,19 @@
+
+#  _______       _____      ______ ______        ______
+#  __  __ \___  ____(_)________  /____  / ______ ___  /_
+#  _  / / /  / / /_  /_  ___/_  //_/_  /  _  __ `/_  __ \
+#  / /_/ // /_/ /_  / / /__ _  ,<  _  /___/ /_/ /_  /_/ /
+#  \___\_\\__,_/ /_/  \___/ /_/|_| /_____/\__,_/ /_.___/
+#
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 #====================
-# QuickLab Components
+# Components
 #====================
 create_network = false  # (bool)
 create_bastion = false  # (bool)
@@ -8,27 +22,27 @@ monitoring     = "none" # (string) Valid values include "none" or "sumo".
 
 
 #====================
-# QuickLab Resources
+# Resources
 #====================
 # prefix      = "quicklab"
 
 # Tags
-# owner       = "user@company.com"
-environment = "dev"
 project     = "my-project"
-createdwith = "terraform cli"
-# createdby   = "me"
-# createdfor  = "testing"
+environment = "dev"
+createdfor  = "testing"
+# owner       = "user@company.com" 
+# createdby   = "me" # defaults to AWS IAM username
+# createdwith = "terraform cli"
 
 
 #====================
-# QuickLab Remote Access
+# Remote Access
 #====================
-# remoteaccesscidrs = [ "1.2.3.4/32", "5.6.7.8/32" ] # (limit to 5 entries, 0.0.0.0/0 is not allowed)
+# remoteaccesscidrs = [ "1.2.3.4/32", "5.6.7.8/32" ] # limit to 5 entries, 0.0.0.0/0 is not allowed
 
 
 #====================
-# QuickLab Monitoring
+# Monitoring
 #====================
 # aws_account_name = "my-aws-account" # displays in Sumo Logic
 # notify = "user@company.com" # an email recipient for sumo-related nofitications for operational and collection issues

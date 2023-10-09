@@ -1,3 +1,9 @@
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # General
 output "_lab_id" {
   description = "a unique Lab Id generated when creating an empty QuickLab."
@@ -74,28 +80,3 @@ output "sumo_cluster_rum_traces_url" {
   description = "the Sumo Logic RUM Traces Source URL"
   value       = try(module.sumo["${local.uid}"].rum_traces_url, null)
 }
-
-
-/*
-output "network_priv_subnet_a" {
-  description = "network private subnet AZ a"
-  value       = module.network["${local.uid}"].private_subnet_a
-}
-output "network_priv_subnet_b" {
-  description = "network private subnet AZ b"
-  value       = module.network["${local.uid}"].private_subnet_b
-}
-output "network_pub_subnets" {
-  description = "network public subnet IDs"
-  value       = try([module.network["${local.uid}"].public_subnet_a, module.network["${local.uid}"].public_subnet_b], null)
-}
-output "network_priv_subnets" {
-  description = "network private subnet IDs"
-  value       = try([module.network["${local.uid}"].private_subnet_a, module.network["${local.uid}"].private_subnet_b], null)
-}
-output "network_ssh_keyname" {
-  description = "the name of the SSH keypair for the QuickLab VPC"
-  value       = try(module.network["${local.uid}"].ssh_key.key_name, null)
-}
-
-*/

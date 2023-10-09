@@ -1,3 +1,10 @@
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 # EC2 Instance
 resource "aws_instance" "this" {
   ami                  = data.aws_ssm_parameter.al23.value # data.aws_ami.amazon_linux_2.id

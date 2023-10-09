@@ -1,3 +1,10 @@
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 #====================
 # AWS Cost Explorer
 #====================
@@ -71,7 +78,6 @@ resource "sumologic_field" "costexplorer" {
   state      = "Enabled"
 }
 resource "sumologic_field_extraction_rule" "costexplorer" {
-  for_each         = var.create_network ? toset(["network"]) : toset([])
   name             = "AWS Cost Explorer"
   scope            = "account = * region CostUsd CostType StartDate EndDate MetricType Granularity Service LinkedAccount"
   parse_expression = <<-EOT

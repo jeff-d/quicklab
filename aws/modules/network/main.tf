@@ -1,3 +1,10 @@
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 # VPC
 resource "aws_vpc" "this" {
   cidr_block = "10.0.0.0/16"
@@ -47,13 +54,6 @@ resource "aws_ec2_managed_prefix_list" "remote_access" {
       cidr        = entry.value
     }
   }
-
-  /*
-  entry {
-    cidr        = var.remoteaccesscidr == null ? "${aws_eip.ngw.public_ip}/32" : var.remoteaccesscidr
-    description = "A CIDR which is authorized to access ${var.prefix} Network resources"
-  }
-  */
 
   tags = {
     Module      = local.module
@@ -294,6 +294,8 @@ resource "aws_security_group_rule" "allow_rdp_in_udp" {
   prefix_list_ids   = [aws_ec2_managed_prefix_list.remote_access.id, aws_ec2_managed_prefix_list.vpc.id]
   security_group_id = aws_security_group.remoteaccess_rdp.id
 }
+
+#TODO: update security group ingress rule to new-style terraform resource, once they support a list of prefix_list_ids
 /*
 resource "aws_vpc_security_group_ingress_rule" "allow_rdp_in_tcp" {
   # only supports a single prefix_list

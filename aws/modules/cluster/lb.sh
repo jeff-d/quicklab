@@ -1,6 +1,12 @@
 #!/bin/bash
 
-# lb.sh
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 # This script prints summary of QuickLab k8s-managed load balancers, 
 # watching for any 'provisioning' load balancers to become 'active'.
 

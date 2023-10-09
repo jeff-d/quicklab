@@ -1,3 +1,9 @@
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 provider "local" {}
 provider "null" {}
 provider "random" {}
@@ -29,10 +35,10 @@ provider "sumologic" {
   environment = var.sumo_env
 }
 
+
 resource "random_id" "quicklab" {
   byte_length = 3
 }
-
 resource "aws_resourcegroups_group" "this" {
   name        = "${var.prefix}-${local.uid}-resources"
   description = "A group of terraform-managed resources for QuickLab Lab Id ${local.uid}."
@@ -59,6 +65,7 @@ resource "aws_resourcegroups_group" "this" {
   }
 }
 
+
 module "network" {
 
   depends_on = [random_id.quicklab]
@@ -73,7 +80,6 @@ module "network" {
   remoteaccesscidrs = var.remoteaccesscidrs
   create_cluster    = var.create_cluster # enable cluster subnet autodiscovery
 }
-
 module "bastion" {
 
   depends_on = [random_id.quicklab, module.network]
@@ -97,7 +103,6 @@ module "bastion" {
   sg_remoteaccess_rdp = module.network["${local.uid}"].sg_remoteaccess_rdp_id
   monitoring          = var.monitoring
 }
-
 module "cluster" {
 
   depends_on = [random_id.quicklab, module.network]
@@ -120,7 +125,6 @@ module "cluster" {
   sumo_accesskey              = var.sumo_accesskey
   sumo_cluster_rum_traces_url = length(module.sumo) > 0 ? module.sumo["${local.uid}"].rum_traces_url : "n/a"
 }
-
 module "sumo" {
 
   depends_on = [random_id.quicklab]

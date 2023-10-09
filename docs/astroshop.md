@@ -1,3 +1,9 @@
+[comment]: # "This file is part of QuickLab, which creates simple, monitored labs."
+[comment]: # "https://github.com/jeff-d/quicklab"
+[comment]: #
+[comment]: # "SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>"
+[comment]: # "SPDX-License-Identifier: AGPL-3.0-or-later"
+
 # Sumo Logic Astronomy Shop
 
 ![Demo App Homepage](https://opentelemetry.io/docs/demo/screenshots/frontend-1.png)
@@ -230,11 +236,7 @@ Terraform
 
 ## Documentation
 
-- [README](../README.md)
 - [Requirements](requirements.md)
 - [Usage](usage.md)
-- [Working with QuickLab Components](components.md)
-- [Private Servers](servers.md)
-- [Sumo Logic Astronomy Shop](astroshop.md)
-- [QuickLab Monitoring](monitoring.md)
-- [Project Notes](notes.md)
+- [Components](components.md)
+- [About](about.md)

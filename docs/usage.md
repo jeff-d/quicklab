@@ -1,4 +1,8 @@
-these docs best viewed in a [browser](https://github.com/simov/markdown-viewer) as they contain hyperlinks and images.
+[comment]: # "This file is part of QuickLab, which creates simple, monitored labs."
+[comment]: # "https://github.com/jeff-d/quicklab"
+[comment]: #
+[comment]: # "SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>"
+[comment]: # "SPDX-License-Identifier: AGPL-3.0-or-later"
 
 # QuickLab Usage
 
@@ -13,7 +17,7 @@ these docs best viewed in a [browser](https://github.com/simov/markdown-viewer) 
 - create API keys (for [cloud provider](requirements.md#general) and [monitoring](requirements.md#monitoring))
 - download [required](requirements.md) software
 - add API keys to QuickLab for monitoring
-  - Edit `aws.auto.tfvars`. In the `QuickLab TF providers` section, add Sumo Logic credentials.
+  - Edit `aws.auto.tfvars`. In the `Terraform providers` section, add Sumo Logic credentials.
 
 _Notes:_
 
@@ -24,24 +28,12 @@ _Notes:_
 
 **This step validates you have met the prerequisites and is required before enabling QuickLab components.**
 
-- initialize terraform from the root module (e.g. `quicklab/aws`) using `terraform init`.
-- create empty QuickLab (with all components disabled) using `terraform apply -auto-approve` and review terraform output. It should be similar to:
+- Initialize terraform and create empty QuickLab using `terraform init && terraform apply -auto-approve`
 
-  ```
-  quicklab/aws $ terraform apply -auto-approve
+  _Notes:_
 
-  Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
-
-  Outputs:
-
-  _lab_id = "6eg4"
-  _lab_resource_group = "quicklab-6eg4-resources"
-  aws_caller = "arn:aws:iam::111111111111:user/username"
-  aws_region = "us-east-2"
-
-  ```
-
-  _Note: `terraform apply` can be used without `-auto-approve` to review the tf plan before terraform implements it._
+  - _terraform must be initalized from a root module (e.g. `quicklab/aws`)_
+  - _`terraform apply` can be used without `-auto-approve` to review the tf plan before terraform implements it._
 
 ### Use
 
@@ -49,12 +41,7 @@ Enable the QuickLab components needed for your use case, starting with the Netwo
 
 - enable or disable a component
 
-  - Edit `aws.auto.tfvars`. In the `QuickLab Components` section, set `create_network` to `true` (or `false`).
-  - Update QuickLab using `terraform apply -auto-approve` and review terraform output.
-
-- enable or disable monitoring
-
-  - Edit `aws.auto.tfvars`. In the `QuickLab Components` section, set `monitoring` to `sumo` (or `none`).
+  - Edit `aws.auto.tfvars`. In the `Components` section, set `create_network` to `true` (or `false`).
   - Update QuickLab using `terraform apply -auto-approve` and review terraform output.
 
 - build on QuickLab
@@ -66,6 +53,7 @@ Enable the QuickLab components needed for your use case, starting with the Netwo
 
 _Notes:_
 
+- _QuickLab monitoring is enabled by selecting a supported monitoring backend (e.g. Sumo Logic, using `monitoring = "sumo"`)_
 - _See a QuickLab inventory in the [AWS Console](https://console.aws.amazon.com/resource-groups/) using the `_lab_resource_group` named in the terraform output._
 - _For typical QuickLab component create/destroy times, see [component notes](component-notes.md#resource-createdestroy-times)._
 - _When building on QuickLab, remember that any resources you create or add will not be managed by QuickLab's terraform state. These resources should be removed prior to disabling any QuickLab component they depend on._
@@ -74,7 +62,6 @@ _Notes:_
 
 - destroy QuickLab
 
-  - Use `terraform destroy` to reset the Lab Id and clear Terraform state.
   - To remove all QuickLab components while maintaining the existing Lab Id, use:
 
     ```
@@ -86,15 +73,13 @@ _Notes:_
     -var="monitoring=none"
     ```
 
+  - Use `terraform destroy` to reset the Lab Id and clear Terraform state.
+
     _Note: terraform [variables can be set](https://developer.hashicorp.com/terraform/language/values/variables#assigning-values-to-root-module-variables) for each run via cli argument_
 
 ## Documentation
 
-- [README](../README.md)
 - [Requirements](requirements.md)
 - [Usage](usage.md)
-- [Working with QuickLab Components](components.md)
-- [Private Servers](servers.md)
-- [Sumo Logic Astronomy Shop](astroshop.md)
-- [QuickLab Monitoring](monitoring.md)
-- [Project Notes](notes.md)
+- [Components](components.md)
+- [About](about.md)

@@ -1,5 +1,12 @@
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 #====================
-# QuickLab Components
+# Components
 #====================
 variable "create_network" {
   type        = bool
@@ -22,14 +29,14 @@ variable "monitoring" {
   default     = "none"
 
   validation {
-    condition     = var.monitoring == can(contains(["none", "sumo"], var.monitoring))
+    condition     = var.monitoring == "none" || can(contains(["sumo"], var.monitoring))
     error_message = "Valid values include \"none\" or \"sumo\"."
   }
 }
 
 
 #====================
-# QuickLab Resources
+# Resources
 #====================
 variable "prefix" {
   type        = string
@@ -41,37 +48,37 @@ variable "prefix" {
 variable "owner" {
   type        = string
   description = "a valid email address designating the resource's owner"
-  default     = "unspecified"
+  default     = " "
 }
 variable "environment" {
   type        = string
   description = "Environment designation (e.g. dev, prod)."
-  default     = "unspecified"
+  default     = " "
 }
 variable "project" {
   type        = string
   description = "Project name."
-  default     = "unspecified"
+  default     = " "
 }
 variable "createdby" {
   type        = string
   description = "userid or API key of resource's creator"
-  default     = "unspecified"
+  default     = " "
 }
 variable "createdfor" {
   type        = string
   description = "the resource creator's intention for this resource"
-  default     = "unspecified"
+  default     = " "
 }
 variable "createdwith" {
   type        = string
   description = "mechanism by which this a resource was created"
-  default     = "unspecified"
+  default     = " "
 }
 
 
 #====================
-# QuickLab Remote Access
+# Remote Access
 #====================
 variable "remoteaccesscidrs" {
   type        = list(string)
@@ -89,7 +96,7 @@ variable "remoteaccesscidrs" {
 
 
 #====================
-# QuickLab Monitoring
+# Monitoring
 #====================
 variable "aws_account_name" {
   type        = string

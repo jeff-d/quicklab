@@ -1,4 +1,8 @@
-these docs best viewed in a [browser](https://github.com/simov/markdown-viewer) as they contain hyperlinks and images.
+[comment]: # "This file is part of QuickLab, which creates simple, monitored labs."
+[comment]: # "https://github.com/jeff-d/quicklab"
+[comment]: #
+[comment]: # "SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>"
+[comment]: # "SPDX-License-Identifier: AGPL-3.0-or-later"
 
 # QuickLab
 
@@ -48,8 +52,5 @@ _QuickLab on AWS, showing all components enabled, including the Network (VPC), B
 
 - [Requirements](docs/requirements.md)
 - [Usage](docs/usage.md)
-- [Working with QuickLab Components](docs/components.md)
-- [Private Servers](docs/servers.md)
-- [Sumo Logic Astronomy Shop](docs/astroshop.md)
-- [QuickLab Monitoring](docs/monitoring.md)
-- [Project Notes](docs/notes.md)
+- [Components](docs/components.md)
+- [About](docs/about.md)

@@ -1,4 +1,8 @@
-these docs best viewed in a [browser](https://github.com/simov/markdown-viewer) as they contain hyperlinks and images.
+[comment]: # "This file is part of QuickLab, which creates simple, monitored labs."
+[comment]: # "https://github.com/jeff-d/quicklab"
+[comment]: #
+[comment]: # "SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>"
+[comment]: # "SPDX-License-Identifier: AGPL-3.0-or-later"
 
 # QuickLab Requirements
 
@@ -35,84 +39,20 @@ these docs best viewed in a [browser](https://github.com/simov/markdown-viewer) 
 
 ## Recommendations
 
-While the below are not needed, they may make some advanced scenarios or troubleshooting easier.
+While the below are not needed, they may help you get started faster, or make some advanced scenarios easier.
 
-- [Markdown Viewer](https://github.com/simov/markdown-viewer) : a browser extension for viewing markdown documents, with support for images and hyperlinks
 - [Homebrew](https://brew.sh/) : a package manager for Mac OS which can be used to install the tools used by QuickLab via `brew install`
 - [direnv](https://direnv.net/) (`brew install direnv`) : a shell extension for using directory-specific environment variables, which [can be used](https://developer.hashicorp.com/terraform/cli/config/environment-variables) to keep API keys out of terraform
 - [GraphViz](https://graphviz.org/) (`brew install graphviz`) : can be used when generating an image of the [terraform graph](https://developer.hashicorp.com/terraform/cli/commands/graph#generating-images)
 - [jq](https://jqlang.github.io/jq/) (`brew install jq`) : lightweight cli json processor
 - [yq](https://kislyuk.github.io/yq/) (`brew install yq`) : cli tool for working with yaml
-
-## Terraform Providers
-
-Upon `terraform init`, QuickLab will download the following terraform providers:
-
-```
-terraform providers
-
-Providers required by configuration:
-.
-├── provider[registry.terraform.io/hashicorp/random] ~> 3.5
-├── provider[registry.terraform.io/hashicorp/null] ~> 3.2
-├── provider[registry.terraform.io/sumologic/sumologic] ~> 2.23
-├── provider[registry.terraform.io/hashicorp/local] ~> 2.4
-├── provider[registry.terraform.io/hashicorp/tls] ~> 4.0
-├── provider[registry.terraform.io/hashicorp/time] ~> 0.9
-├── provider[registry.terraform.io/hashicorp/cloudinit] ~> 2.3
-├── provider[registry.terraform.io/hashicorp/http] ~> 3.3
-├── provider[registry.terraform.io/hashicorp/aws] ~> 5.0
-├── module.bastion
-│   ├── provider[registry.terraform.io/sumologic/sumologic] ~> 2.22
-│   ├── provider[registry.terraform.io/hashicorp/aws]
-│   └── provider[registry.terraform.io/hashicorp/cloudinit]
-├── module.cluster
-│   ├── provider[registry.terraform.io/hashicorp/http]
-│   ├── provider[registry.terraform.io/hashicorp/tls]
-│   ├── provider[registry.terraform.io/hashicorp/aws]
-│   ├── provider[registry.terraform.io/hashicorp/null]
-│   └── provider[registry.terraform.io/hashicorp/local]
-├── module.network
-│   ├── provider[registry.terraform.io/hashicorp/local]
-│   ├── provider[registry.terraform.io/hashicorp/tls]
-│   └── provider[registry.terraform.io/hashicorp/aws]
-└── module.sumo
-    ├── provider[registry.terraform.io/sumologic/sumologic] ~> 2.22
-    ├── provider[registry.terraform.io/hashicorp/aws]
-    ├── provider[registry.terraform.io/hashicorp/null]
-    ├── provider[registry.terraform.io/hashicorp/local]
-    └── provider[registry.terraform.io/hashicorp/time]
-
-Providers required by state:
-
-    provider[registry.terraform.io/sumologic/sumologic]
-
-    provider[registry.terraform.io/hashicorp/cloudinit]
-
-    provider[registry.terraform.io/hashicorp/http]
-
-    provider[registry.terraform.io/hashicorp/local]
-
-    provider[registry.terraform.io/hashicorp/random]
-
-    provider[registry.terraform.io/hashicorp/tls]
-
-    provider[registry.terraform.io/hashicorp/aws]
-
-    provider[registry.terraform.io/hashicorp/null]
-
-    provider[registry.terraform.io/hashicorp/time]
-```
+- [Markdown Viewer](https://github.com/simov/markdown-viewer) : a browser extension for viewing markdown documents, with support for images and hyperlinks
 
 ---
 
 ## Documentation
 
-- [README](../README.md)
 - [Requirements](requirements.md)
 - [Usage](usage.md)
-- [Working with QuickLab Components](components.md)
-- [Private Servers](servers.md)
-- [Sumo Logic Astronomy Shop](astroshop.md)
-- [QuickLab Monitoring](monitoring.md)
-- [Project Notes](notes.md)
+- [Components](components.md)
+- [About](about.md)

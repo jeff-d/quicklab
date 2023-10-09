@@ -1,3 +1,10 @@
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 output "instance_id" {
   description = "ID of the EC2 Instance"
   value       = aws_instance.this.id
@@ -19,16 +26,3 @@ output "ssh_config" {
   description = "the SSH config file that references the the QuickLab Bastion"
   value       = local_file.ssh_config.filename
 }
-
-/*
-
-output "ssh_known_hosts" {
-  description = "add bastion entry to known_hosts with this command"
-  value       = "ssh-keyscan -t ed25519 ${aws_instance.this.public_dns} >> ~/.ssh/known_hosts"
-}
-
-output "ssh" {
-  description = "SSH to instance using this command"
-  value       = "ssh -i '${local_sensitive_file.kp.filename}' ec2-user@${aws_instance.this.public_dns}"
-}
-*/

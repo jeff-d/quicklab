@@ -1,3 +1,10 @@
+# This file is part of QuickLab, which creates simple, monitored labs.
+# https://github.com/jeff-d/quicklab
+#
+# SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
 data "aws_partition" "current" {}
 data "aws_region" "current" {}
 data "aws_ssm_parameter" "eks_ami_release_version" {
