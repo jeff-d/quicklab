@@ -1,0 +1,56 @@
+#cloud-config
+
+write_files:
+- path: /etc/otelcol-sumo/conf.d/log-system.yaml
+  # owner: 'otelcol-sumo:otelcol-sumo'
+  permissions: '0640'
+  defer: false
+  content: | 
+    receivers:
+      filelog/system:
+        start_at: end
+        include_file_name: false
+        include_file_path_resolved: true
+        operators:
+        - type: move
+          from: attributes["log.file.path_resolved"]
+          to: resource["log.file.path_resolved"]
+        resource:
+          _sourceCategory: ${PREFIX}/${UID}/aws/${REGION}/bastion/system
+          _source: filelog/system
+        include:
+        - /var/log/auth.log
+        - /var/log/syslog
+        - /var/log/daemon.log
+        - /var/log/dpkg.log
+        - /var/log/kern.log
+        - /var/log/audit/audit.log
+        - /var/log/secure
+        - /var/log/messages
+        - /var/log/yum.log
+        - /var/log/dnf.log
+    processors:
+      resource/linux_resource_attributes/localhost:
+        attributes:
+          - key: sumo.datasource
+            action: insert
+            value: linux
+      groupbyattrs:
+        keys:
+          - log.file.path_resolved
+      sumologic_schema:
+    service:
+      pipelines:
+        logs/system:
+          receivers:
+          - filelog/system
+          processors:
+          - memory_limiter
+          - resource/linux_resource_attributes/localhost
+          - groupbyattrs
+          - resourcedetection/system
+          - resourcedetection/ec2
+          - batch
+          - sumologic_schema
+          exporters:
+          - sumologic

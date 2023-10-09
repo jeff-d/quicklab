@@ -1,0 +1,15 @@
+variable "uid" {}
+variable "prefix" {}
+variable "project" {}
+variable "creator" {}
+variable "environment" {}
+variable "vpc" {}
+variable "bastion_az" {}
+variable "bastion_subnet" {}
+variable "ssh_key" {}
+variable "ssh_key_filename" {}
+variable "pl_vpc" {}
+variable "pl_remoteaccess" {}
+variable "sg_remoteaccess_ssh" {}
+variable "sg_remoteaccess_rdp" {}
+variable "monitoring" {}

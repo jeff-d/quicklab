@@ -1,0 +1,3 @@
+export KUBECONFIG=$KUBECONFIG:~/.kube/${CLUSTERNAME}
+kubectl --namespace kube-system create serviceaccount ${SERVICEACCOUNTNAME}
+kubectl --namespace kube-system annotate serviceaccount ${SERVICEACCOUNTNAME} eks.amazonaws.com/role-arn=${IRSA_ARN}

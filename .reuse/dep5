@@ -1,0 +1,24 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: QuickLab
+Upstream-Contact: Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+Source: https://github.com/jeff-d/QuickLab
+
+Files: aws/*
+Copyright: 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+License: AGPL-3.0-or-later
+
+Files: azure/*
+Copyright: 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+License: AGPL-3.0-or-later
+
+Files: docs/quicklab*.png
+Copyright: 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+License: AGPL-3.0-or-later
+
+Files: README.md
+Copyright: 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+License: AGPL-3.0-or-later
+
+Files: .gitignore
+Copyright: 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
+License: CC0-1.0

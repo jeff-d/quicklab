@@ -1,0 +1,34 @@
+#cloud-config
+
+write_files:
+- path: /etc/otelcol-sumo/conf.d/${PREFIX}-${UID}-otelcol-sumo.yaml
+  # owner: 'otelcol-sumo:otelcol-sumo'
+  permissions: '440'
+  defer: true
+  content: |
+    extensions:
+      sumologic:
+        collector_name: "${PREFIX}-${UID}-bastion"
+        collector_description: "Bastion Host for QuickLab ${UID}"
+        collector_category: ${PREFIX}/${UID}/aws/${REGION}/bastion/
+        clobber: ${CLOBBER}
+        ephemeral: ${EPHEMERAL}
+    processors:
+      resourcedetection/ec2:
+        detectors: [ec2]
+        ec2:
+          # A list of regex's to match tag keys to add as resource attributes can be specified
+          tags:
+            - ^tag1$
+            - ^tag2$
+            - ^label.*$
+            - ^created*$ #TODO: test this
+        timeout: 5s
+        override: true # <bool>, defaults to true
+
+runcmd:
+ - 'IMDSTOKEN=$(curl -s "http://169.254.169.254/latest/api/token" -X PUT -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")'
+ - REGION=$(cloud-init query -f {{v1.region}})
+ - aws secretsmanager get-secret-value --region $REGION --secret-id ${PREFIX}-${UID}-sumo-token --query SecretString --output text >> /etc/sumotoken.txt
+ - SUMOTOKEN=$(cat /etc/sumotoken.txt)
+ - sudo curl -s https://raw.githubusercontent.com/SumoLogic/sumologic-otel-collector/main/scripts/install.sh | sudo -E bash -s -- --installation-token $SUMOTOKEN --tag "host.group=${PREFIX}" --tag "deployment.environment=${ENVIRONMENT}" --tag "project=${PROJECT}"

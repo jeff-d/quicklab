@@ -1,0 +1,9 @@
+dependencies:
+- name: sumologic
+  repository: https://sumologic.github.io/sumologic-kubernetes-collection
+  version: 3.6.0
+- name: opentelemetry-demo
+  repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+  version: 0.19.10
+digest: sha256:4cab738bbe46d989021a20f8d9d8551dc98fa2bd928a15271ce3ee2b180609e5
+generated: "2023-05-10T14:04:16.468061-04:00"

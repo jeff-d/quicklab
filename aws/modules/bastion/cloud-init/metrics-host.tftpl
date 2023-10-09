@@ -1,0 +1,70 @@
+#cloud-config
+
+write_files:
+- path: /etc/otelcol-sumo/conf.d/metrics-host.yaml
+  # owner: 'otelcol-sumo:otelcol-sumo'
+  permissions: '0640'
+  defer: false
+  content: |
+    receivers:
+      hostmetrics/linux/localhost:
+        scrapers:
+          cpu:
+            metrics:
+              system.cpu.utilization:
+                enabled: true
+          load: null
+          memory:
+            metrics:
+              system.memory.utilization:
+                enabled: true
+          disk: null
+          filesystem:
+            metrics:
+              system.filesystem.utilization:
+                enabled: true
+          network: null
+          paging: null
+          process:
+            mute_process_name_error: true
+            metrics:
+              process.threads:
+                enabled: true
+              process.paging.faults:
+                enabled: true
+              process.cpu.utilization:
+                enabled: true
+              process.memory.utilization:
+                enabled: true
+              process.signals_pending:
+                enabled: true
+              process.open_file_descriptors:
+                enabled: true
+              process.context_switches:
+                enabled: true
+              process.disk.operations:
+                enabled: true
+    processors:
+      resource/linux_resource_attributes/localhost:
+        attributes:
+          - key: sumo.datasource
+            value: linux
+            action: insert
+          - action: insert
+            key: _source
+            value: hostmetrics/linux/localhost
+      resourcedetection/ec2:
+    service:
+      pipelines:
+        metrics/linux/localhost:
+          receivers:
+            - hostmetrics/linux/localhost
+          processors:
+            - memory_limiter
+            - resource/linux_resource_attributes/localhost
+            - resourcedetection/system
+            - resourcedetection/ec2
+            - batch
+            - sumologic_schema
+          exporters:
+            - sumologic

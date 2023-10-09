@@ -1,0 +1,10 @@
+Host ${PREFIX}-${UID}-bastion
+	HostName ${HOSTNAME}
+	User ec2-user
+	IdentityFile ${IDENTITYFILE}
+
+Host *.compute.internal
+	ForwardAgent yes
+	ProxyJump ${PREFIX}-${UID}-bastion
+	User ec2-user
+	IdentityFile ${IDENTITYFILE}
