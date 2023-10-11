@@ -46,16 +46,16 @@ Enable the QuickLab components needed for your use case, starting with the Netwo
 
 - build on QuickLab
 
-  - launch Windows or Linux virtual machines into the Network
-  - deploy and use additional network infrastructure like AWS Network Firewall, or Gateway Load Balancer
-  - install containerized applications on the Cluster
-  - install and use software packages on the Bastion (or other Virtual Machines you create)
+  - use the [bastion](components.md#bastion) to securely access Windows or Linux servers in the Network's private subnets
+  - use the [cluster](components.md#cluster) to deploy and use containerized microservice-based apps like the AstronomyShop OpenTelemetry-Demo application.
+  - use Sumo Logic to analyze QuickLab component health, performance, cost, and security using out-of-box [solutions](monitoring.md#app-catalog-apps) with no configuration required
+  - use Sumo Logic to implement OpenTelemetry-based telemetry collection for logs, metrics, and traces to an [Observability backend](https://opentelemetry.io/docs/what-is-opentelemetry/)
 
 _Notes:_
 
 - _QuickLab monitoring is enabled by selecting a supported monitoring backend (e.g. Sumo Logic, using `monitoring = "sumo"`)_
 - _See a QuickLab inventory in the [AWS Console](https://console.aws.amazon.com/resource-groups/) using the `_lab_resource_group` named in the terraform output._
-- _For typical QuickLab component create/destroy times, see [component notes](component-notes.md#resource-createdestroy-times)._
+- _For typical QuickLab component create/destroy times, see [component notes](components.md#cycle-times)._
 - _When building on QuickLab, remember that any resources you create or add will not be managed by QuickLab's terraform state. These resources should be removed prior to disabling any QuickLab component they depend on._
 
 ### Destroy

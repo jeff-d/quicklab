@@ -1,4 +1,3 @@
-
 #  _______       _____      ______ ______        ______
 #  __  __ \___  ____(_)________  /____  / ______ ___  /_
 #  _  / / /  / / /_  /_  ___/_  //_/_  /  _  __ `/_  __ \
@@ -30,9 +29,10 @@ monitoring     = "none" # (string) Valid values include "none" or "sumo".
 project     = "my-project"
 environment = "dev"
 createdfor  = "testing"
+createdwith = "terraform cli"
 # owner       = "user@company.com" 
 # createdby   = "me" # defaults to AWS IAM username
-# createdwith = "terraform cli"
+
 
 
 #====================

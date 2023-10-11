@@ -41,7 +41,7 @@ resource "random_id" "quicklab" {
 }
 resource "aws_resourcegroups_group" "this" {
   name        = "${var.prefix}-${local.uid}-resources"
-  description = "A group of terraform-managed resources for QuickLab Lab Id ${local.uid}."
+  description = "terraform-managed resources for QuickLab lab id ${local.uid}."
 
   resource_query {
     query = <<-JSON

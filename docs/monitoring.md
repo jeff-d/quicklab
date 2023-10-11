@@ -29,7 +29,7 @@ Sumo Logic [Fields](https://help.sumologic.com/docs/manage/fields/) are metadata
 
 - AWS Cost Explorer: "account", "linkedaccount"
 - AWS resource tags: "labid", "prefix", "owner", "environment", "project", "createdby", "createdfor", "createdwith"
-- Bastion (OpenTelemetry Collector): "host.group", "deployment.environment", "host.name", "host.id", "os.type", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"
+- QuickLab bastion (OpenTelemetry Collector): "host.group", "deployment.environment", "host.name", "host.id", "os.type", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"
 
 ## App Catalog
 
@@ -49,7 +49,7 @@ QuickLab automatically installs the following Apps along with their required AWS
 
 ## QuickLab+Sumo Logic Use Cases
 
-QuickLab users can enable Sumo Logic collection without building any infrastructure which sends AWS logs to Sumo that are not specific to QuickLab components (Network, Bastion, Cluster). When creating QuickLab components, enabling Sumo Logic telemetry collection provides visibility to what is happening in the Network, Bastion, and Cluster, as explained below.
+QuickLab users can enable Sumo Logic collection without building any infrastructure which sends AWS logs to Sumo that are not specific to QuickLab components. When creating QuickLab components, enabling Sumo Logic telemetry collection provides visibility to what is happening in the network, bastion, and cluster, as explained below.
 
 ### AWS General
 
@@ -87,7 +87,7 @@ VPC Flow Logs
 
 otelcol-sumo config
 
-- otelcol-sumo is installed on Bastion via [Install Script](https://help.sumologic.com/docs/send-data/opentelemetry-collector/install-collector-linux/#install-script)
+- otelcol-sumo is installed on bastion via [Install Script](https://help.sumologic.com/docs/send-data/opentelemetry-collector/install-collector-linux/#install-script)
 - collector customizations are created by cloud-init in `/etc/otelcol-sumo/conf.d/prefix-LabId-otelcol-sumo.yaml` which is picked up by otelcol-sumo on first run
 
 QuickLab default telemetry sources
@@ -126,7 +126,7 @@ EKS Control Plane Logs
 
 - Quicklab intentionally does NOT install or configure the Sumo Logic [Kubernetes Observability](https://help.sumologic.com/docs/observability/kubernetes/) solution. Once your Cluster is active, users can do this by running the `helm upgrade -i` command as per Sumo Logic documentation. Doing so will create a new Hosted Collector (with associated Sources).
 
-- The below example gives the helm release the name `collection`, references a `repo/chart` of `sumologic/sumologic`, and creates kubernetes resources in a new namespace called `sumologic`:
+- The below example gives the helm release the name `collection`, references a `repo/chart` of `sumologic/sumologic`, and creates kubernetes resources in a new namespace called `sumologic`. Sumo Logic credentials are furnished using environment variables.
 
   ```
   helm upgrade -i collection sumologic/sumologic \

@@ -50,7 +50,7 @@ _Note: The example commands below assume execution from the terraform project di
 
 ### Prerequisites
 
-- set kubernetes context to your QuickLab Cluster
+- set kubernetes context to your QuickLab cluster
 
   - suggested approach: update your shell's $KUBECONFIG environment variable
   - example commannd: `eval $(terraform output -raw cluster_kubeconfig)`
@@ -71,7 +71,7 @@ _Note: The example commands below assume execution from the terraform project di
 
 ### Create App
 
-In this step, we will deploy the application to the QuickLab Cluster and expose it publicly to the internet.
+In this step, we will deploy the application to the QuickLab cluster and expose it publicly to the internet.
 
 - create helm release
 
@@ -161,12 +161,12 @@ In this step, we will deploy the application to the QuickLab Cluster and expose 
   - log in to Sumo Logic
   - click **+ New > Explore > Explore By > APM: Service View**
 
-- explopre Cluster
+- explopre cluster
 
   - log in to Sumo Logic
   - click **+ New > Explore > Explore By > Kubernetes Service View**
 
-- view Cluster control-plane dashboards
+- view cluster control-plane dashboards
   - log in to Sumo Logic
   - locate your [Personal Folder](https://help.sumologic.com/docs/get-started/library/#personal-folder) and select the subfolder for your QuickLab Lab Id.
   - click the "Amazon EKS Control Plane" folder and review the [dashboards](https://help.sumologic.com/docs/integrations/amazon-aws/eks-control-plane/#viewing-dashboards-for-amazon-eks---control-plane).
@@ -211,6 +211,9 @@ Helm
 - inspect a chart: ` helm show chart <repo>/<chart>`
 - list repos: `helm repo list`
 - list charts in repo: `helm search repo <helm-repo-name>`
+- get the chart notes for a release: `helm get notes $release --namespace $ns`
+- test template rendering: `helm install $release $chart --namespace $ns --debug --dry-run`
+- debug helm release install or upgrade: `helm upgrade -i $release $chart --namespace $ns --atomic --debug`
 - helm chart template guide: [YAML techniques](https://helm.sh/docs/chart_template_guide/yaml_techniques/)
 
 Kubernetes

@@ -6,6 +6,11 @@
 
 # About QuickLab
 
+QuickLab's design philiosophy aims to balance two competing goals:
+
+- minimalism, which promotes maintainability and cost-optimization
+- a "batteries-included" experience, which doesn't require the QuickLab user to understand the internals of its underlying technologies (e.g. terraform, AWS, Kubernetes, and Sumo Logic).
+
 ## License
 
 QuickLab creates simple, monitored labs.
