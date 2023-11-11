@@ -85,6 +85,10 @@ opentelemetry-demo:
       enabled: false
     jaeger:
       enabled: false
+    prometheus:
+      enabled: false
+    grafana:
+      enabled: false
 
   default:
     env:
@@ -401,7 +405,7 @@ opentelemetry-demo:
         - name: FRONTEND_PORT
           value: "8080"
         - name: PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-          value: 'http://localhost:4318/v1/traces' #? http://otel-demo-collector.mydomain.com:4318/v1/traces
+          value: ${RUMURL} # RUMURL? # 'http://localhost:4318/v1/traces' # http://otel-demo-collector.mydomain.com:4318/v1/traces
         - name: PUBLIC_SUMO_LOGIC_RUM_APPLICATION_NAME
           value: ${APPLICATION}
         - name: PUBLIC_SUMO_LOGIC_RUM_RESOURCE_ATTRIBUTES

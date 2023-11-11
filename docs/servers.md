@@ -8,27 +8,39 @@
 
 A private server is a server that is not exposed to the internet. Create private servers in the QuickLab network's private subnets.
 
+## List Servers
+
+List servers in the QuickLab network
+
+```
+aws ec2 describe-instances \
+  --filters "Name=vpc-id,Values=$(terraform output network_id)" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
+  --query 'Reservations[*].Instances[*].{InstanceId:InstanceId, Name:Tags[?Key==`Name`]|[0].Value, PrivateDnsName:PrivateDnsName, State:State.Name}' \
+  --output table
+```
+
 ## Create & Delete Servers
 
-- create private servers
-  - use the included shell script (`create-server.sh`)
-  - execute the script from the terraform project directory (e.g. `aws`)
-  - specify the system type ("windows" OR "linux") using the `-s` parameter
-  - (optional) specify the count of servers to create using the `-c` parameter (default: `1`)
-  - servers are created using the latest Amazon Linux 2023 and Windows Server 2022 Images
-  - run the script twice to create Linux and Windows servers
-  - example command:
-    ```
-    chmod +x modules/bastion/create-server.sh && ./modules/bastion/create-server.sh -s linux
-    ```
-- delete private servers
-  - use the included shell script (`delete-server.sh`)
-  - execute the script from the terraform project directory (e.g. `aws`)
-  - the script only deletes servers created by `create-servers.sh`
-  - example command:
-    ```
-    chmod +x modules/bastion/delete-server.sh && ./modules/bastion/delete-server.sh
-    ```
+create private servers
+
+- use the included shell script (`create-server.sh`)
+- execute the script from the terraform project directory (e.g. `aws`)
+- specify the system type ("windows" OR "linux") using the `-s` parameter
+- (optional) specify the count of servers to create using the `-c` parameter (default: `1`)
+- servers are created using the latest Amazon Linux 2023 and Windows Server 2022 Images
+- run the script twice to create Linux and Windows servers
+- example command:
+  `   chmod +x modules/bastion/create-server.sh && ./modules/bastion/create-server.sh -s linux`
+
+delete private servers
+
+- use the included shell script (`delete-server.sh`)
+- execute the script from the terraform project directory (e.g. `aws`)
+- the script only deletes servers created by `create-servers.sh`
+- example command:
+  ```
+  chmod +x modules/bastion/delete-server.sh && ./modules/bastion/delete-server.sh
+  ```
 
 ## Connect to Servers
 

@@ -22,7 +22,7 @@ data "http" "workstation-external-ip" {
 
 locals {
   module       = basename(abspath(path.module))
-  uid          = lower(random_id.quicklab.id)
+  uid          = substr(random_id.quicklab.hex, -4, -1)
   split_arn    = split("/", data.aws_caller_identity.current.arn)
   aws_username = element(local.split_arn, length(local.split_arn) - 1)
   myip         = "${chomp(data.http.workstation-external-ip.response_body)}/32"

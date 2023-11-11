@@ -12,6 +12,7 @@ variable "prefix" {}
 variable "project" {}
 variable "environment" {}
 variable "creator" {}
+variable "sumo_accounttype" {}
 variable "sumo_accessid" {}
 variable "sumo_accesskey" {}
 variable "sumo_env" {}

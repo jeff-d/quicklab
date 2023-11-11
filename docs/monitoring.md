@@ -6,6 +6,10 @@
 
 # QuickLab Monitoring: Sumo Logic
 
+## Account Types
+
+QuickLab's `sumo` module is designed for Sumo Logic Cloud Flex Credits accounts, and assumes an account type of "Free" by default. Users can indicicate their use of a different `sumo_accounttype` in `aws.auto.tfvars` to have QuickLab enable certain [other features](https://help.sumologic.com/docs/manage/manage-subscription/cloud-flex-credits-accounts/#features-by-subscription-type) not available to Sumo Logic Free users. Valid values for `sumo_accounttype` include "Free", "Trial", "Essentials", "Enterprise Operations", "Enterprise Security", and "Enterprise Suite".
+
 ## Authentication
 
 Due to terraform provider design, the Sumo Logic Terraform Provider must be configured, whether or not you plan to collect data into Sumo Logic. By default, placeholder values are used.
@@ -61,7 +65,7 @@ CloudTrail Logs
 
 - The AWS CloudTrail App is installed to the Sumo Logic Library (in your personal folder) at "QuickLab/AWS CloudTrail/"
 
-- The App's [User Monitoring](https://help.sumologic.com/docs/integrations/amazon-aws/cloudtrail/#aws-cloudtrail---user-monitoring) dashboard has three panels that track activity from AWS Admins. QuickLab automatically uploads a list of privileged AWS usernames to your Sumo Logic organization to demonstrate this functionality. To enable these panels on the User Monitoring dashboard, manually execute the search `QuickLab\update-aws-admins-list` to populate the list.
+- The App's [User Monitoring](https://help.sumologic.com/docs/integrations/amazon-aws/cloudtrail/#aws-cloudtrail---user-monitoring) dashboard has three panels that track activity from AWS Admins. When using a Sumo Llogic [Account Type](#account-types) compatible with Lookup Tables, QuickLab automatically uploads a list of privileged AWS usernames to your Sumo Logic organization to demonstrate this functionality. To enable these panels on the User Monitoring dashboard, manually execute the search `QuickLab\update-aws-admins-list` to populate the list.
 
 Cost Explorer
 

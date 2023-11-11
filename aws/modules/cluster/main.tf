@@ -51,8 +51,9 @@ resource "aws_cloudwatch_log_group" "eks" {
   retention_in_days = 7
 
   tags = {
-    Module = local.module
-    Name   = "${var.prefix}-${var.uid}-${local.module}-controlplane"
+    Component = local.module
+    Name      = "${var.prefix}-${var.uid}-${local.module}-controlplane"
+    CreatedBy = var.creator
   }
 }
 
@@ -147,19 +148,25 @@ resource "aws_launch_template" "this" {
   key_name               = var.ssh_key.key_name
   vpc_security_group_ids = [aws_security_group.node.id]
 
+  monitoring {
+    enabled = true
+  }
+
   tag_specifications {
     resource_type = "instance"
 
     tags = {
-      Name   = "${aws_eks_cluster.this.name}-eks-node",
-      LabId  = var.uid,
-      Module = local.module
+      Name      = "${aws_eks_cluster.this.name}-eks-node",
+      LabId     = var.uid,
+      Component = local.module
+      CreatedBy = var.creator
     }
   }
 
   tags = {
     "kubernetes.io/cluster/${aws_eks_cluster.this.name}" = "owned"
-    Module                                               = local.module
+    Component                                            = local.module
+    LabId                                                = var.uid,
     CreatedBy                                            = var.creator
   }
 }

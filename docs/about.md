@@ -28,6 +28,8 @@ You should have received a copy of the GNU Affero General Public License along w
 
 - The ASCII art for "QuickLab" was generated using a [Text to ASCII generator](http://patorjk.com/software/taag/#p=display&f=Speed&t=QuickLab) with the "Speed" font.
 
+- This terraform project incorporates much of the guidance and design principles found in [The AWS Integration & Automation Team's Best Practices for Terraform](https://aws-ia.github.io/standards-terraform/)
+
 - QuickLab uses local terraform state, which is appropritate for a single-user project that creates short-lived infrastructure resources. If you would like to co-manage a QuickLab with your friends, consider using a terraform deployment pattern that implements proper remote state storage and locking (e.g. [AWS S3 with DyanmoDB](https://www.terraform.io/language/settings/backends/s3))
 
 - To avoid spurious terraform state diffs, QuickLab generates it's unique LabId using terraform's random provider rather than the uuid string function for reasons explained in the [terraform docs](https://developer.hashicorp.com/terraform/language/functions/uuid).
@@ -52,6 +54,7 @@ Next Up:
 
 Recently Added or Updated:
 
+- AWS (bastion): added shell scripts to create and delete servers in QuickLab network's private subnets
 - AWS (cluster): added shell script to ease un/install of AstronomyShop app in QuickLab cluster
 - AWS (sumo): EKS Control Plane App installed when Cluster enabled
 - AWS (cluster): enabled EKS Control Plane Logs

@@ -56,8 +56,8 @@ createdwith = "terraform cli"
 # aws_region  = "us-west-2"
 
 # Sumo Logic
+# sumo_accounttype = "Enterprise Suite" # ("Free", "Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite")
 # sumo_org = ""
 # sumo_accessid  = ""
 # sumo_accesskey = ""
 # sumo_env = "" # (lowercase "us1", "us2", "de", et al)
-

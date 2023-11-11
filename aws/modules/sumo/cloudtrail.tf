@@ -97,6 +97,9 @@ resource "null_resource" "upload_aws_admins" {
   }
 }
 resource "sumologic_lookup_table" "aws_admins" {
+
+  for_each = contains(["Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype) ? toset(["${var.sumo_accounttype}"]) : toset([])
+
   name = "aws-admins"
   fields {
     field_name = "admin_users"
@@ -109,6 +112,9 @@ resource "sumologic_lookup_table" "aws_admins" {
   description       = "QuickLab AWS Admins"
 }
 resource "sumologic_content" "load_aws_admins" {
+
+  for_each = contains(["Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype) ? toset(["${var.sumo_accounttype}"]) : toset([])
+
   parent_id = sumologic_folder.this.id
   config = jsonencode(
     {

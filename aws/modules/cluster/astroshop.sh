@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 
-# This script installs a the sumo-opentelemetry-demo helm release into the QuickLab cluster, 
+# This script installs a the OpenTelemetry-Demo helm release into the QuickLab cluster, 
 # and returns the app's public URL for usage.
 
 set -e
@@ -17,16 +17,19 @@ set -o pipefail
 
 ## CONSTANTS
 scriptName="$(basename ${0})"
+lab=$(terraform output -raw _lab_id)
+release=otel-demo
+ns=apps
+chart="modules/cluster/sumo-opentelemetry-demo/"
+# chart="open-telemetry/opentelemetry-demo"
+# values="modules/cluster/otel-demo-values.yaml"
 
 ## FUNCTIONS
-
-# EXIT
-exit_trap () {
+function exit_trap () {
   local lc="$BASH_COMMAND" rc=$?
-  echo "Command [$lc] exited with code [$rc]"
+  echo "Command $lc exited with code [$rc]"
 }
 
-# USAGE
 function usage(){
   banner
   printf "%s\n"  "Usage: $scriptName [-i | -u ]"
@@ -36,8 +39,35 @@ function usage(){
   printf "%s\n" "  -u [uninstall]    uninstall the astronomy shop app from QuickLab cluster that was installed by this script"
   printf "%s\n"
 }
- 
-# OPTIONS
+
+function cluster_check() {
+
+  # quicklab cluster check
+  cluster=$(terraform output -raw cluster_name)
+  if [[ $? -ne 0 ]]; then
+    printf "%s\n" "ERROR [$?]: no QuickLab cluster found."
+    exit 1
+  fi
+  
+  # set kubernetes context
+  set +u
+  eval $(terraform output -raw cluster_kubeconfig)
+  if [[ $? -ne 0 ]]; then
+    printf "%s\n" "ERROR [$?]: unable to set QuickLab cluster kubeconfig."
+    exit 1
+  fi
+  set -u
+
+  # verify your kubernetes context
+  kubeapi=$(kubectl cluster-info | grep "Kubernetes control plane")
+  if [[ $? -ne 0 ]]; then
+    printf "%s\n" "ERROR [$?]: to connect to QuickLab cluster."
+    printf "%s\n" "To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'."
+    exit 1
+  fi
+
+}
+
 function get_opts() {
   
   task="unspecified"
@@ -59,40 +89,8 @@ function get_opts() {
     exit
   fi
 
-  # quicklab cluster check
-  cluster=$(terraform output -raw cluster_name)
-  if [[ $? -ne 0 ]]; then
-    printf "%s\n" "ERROR [$?]: no QuickLab cluster found."
-    exit 1
-  fi
-
-  # set kubernetes context to your QuickLab Cluster
-  # kc=$(terraform output -raw cluster_kubeconfig)
-  # printf "%s\n" "kc: $kc"
-  # eval $kc
-  eval $(terraform output -raw cluster_kubeconfig)
-  if [[ $? -ne 0 ]]; then
-    printf "%s\n" "ERROR [$?]: unable to set cluster kubeconfig."
-    exit 1
-  fi
-
-  # verify your kubernetes context
-  kubeapi=$(kubectl cluster-info | grep "Kubernetes control plane")
-  if [[ $? -ne 0 ]]; then
-    printf "%s\n" "ERROR [$?]: to connect to cluster."
-    printf "%s\n" "To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'."
-    exit 1
-  fi
-
-  lab=$(terraform output -raw _lab_id)
-  release=astroshop
-  ns=app-astroshop
-  chart="modules/cluster/sumo-opentelemetry-demo/"
-  # printf "%s\n" "lab=$lab" "release=$release" "chart=$chart" "ns=$ns"
-
 }
 
-# UNINSTALL
 function uninstall(){
 
   printf "%s\n"
@@ -158,25 +156,27 @@ function uninstall(){
   fi
 }
 
-# INSTALL
 function install() {
 
   printf "%s\n"
   printf "%s\n" "Installing AstronomyShop components:"
 
+  # add open-telemetry helm repo
+  printf "%s\n" "  + helm repo"
+  helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts | awk '{ print "    " $0; }'
+
+  helm repo update | awk '{ print "    " $0; }'
 
   # create helm release
   timestamp=$(date +"%r")
-  # printf "%s\n" "$timestamp :: Creating helm release ( > 5 minutes )..."
   printf "%s\n" "  + helm release (~5m from $timestamp)"
-  helm upgrade -i $release $chart --atomic  --namespace $ns --create-namespace > /dev/null | awk '{ print "  " $0; }'
+  # --values $values
+  helm upgrade -i $release $chart --values $values --atomic --namespace $ns --create-namespace > /dev/null | awk '{ print "  " $0; }'
   timestamp=$(date +"%r")
   printf "%s\n" "    ($timestamp) release $release created successfully in namespace $ns from chart $chart"
 
-
   # watch application pods come up
   # kubectl -n $ns get pods --watch # timer?
-
 
   # expose app publicly
   now=$(date "+%M%S")
@@ -191,13 +191,11 @@ function install() {
     --annotation alb.ingress.kubernetes.io/load-balancer-name=$lbname \
   | awk '{ print "    " $0; }'
 
-  
   # verify load balancer is `active`
   sleep 5
   source ./modules/cluster/lb.sh | awk '{ print "    " $0; }'
   timestamp=$(date +"%r")
   printf "%s\n" "    ($timestamp)"
-
 
   # installation summary
   dnsname=$(aws elbv2 describe-load-balancers --names=$lbname --query "LoadBalancers[0].DNSName" --output text)
@@ -211,7 +209,6 @@ function install() {
 
 }
 
-# BANNER
 function banner() {
 cat << "EOF"
 
@@ -225,15 +222,17 @@ EOF
 
 printf "%s\n" "$scriptName"
 printf "%s\n"
+printf "%s\n" "\"AstronomyShop\" is the OpenTelemetry Demo Application"
+printf "%s\n" "https://opentelemetry.io/docs/demo/"
+printf "%s\n"
 }
 
 ## SCRIPT BODY
 get_opts "$@"
 banner
+cluster_check
 printf "%s\n" "QuickLab cluster: $cluster"
 printf "%s\n" "  $kubeapi"
-printf "%s\n"
-printf "%s\n" "\"AstronomyShop\" is a Sumo Logic fork of the OpenTelemetry Demo Application"
 if [[ "$task" == "install" ]]; then
   install
 elif [[ "$task" == "uninstall" ]]; then

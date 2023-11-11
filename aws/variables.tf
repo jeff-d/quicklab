@@ -29,7 +29,7 @@ variable "monitoring" {
   default     = "none"
 
   validation {
-    condition     = var.monitoring == "none" || can(contains(["sumo"], var.monitoring))
+    condition     = contains(["none", "sumo"], var.monitoring)
     error_message = "Valid values include \"none\" or \"sumo\"."
   }
 }
@@ -126,6 +126,17 @@ variable "aws_region" {
 }
 
 # Sumo Logic
+variable "sumo_accounttype" {
+  type        = string
+  description = "Sumo Logic Cloud Flex Credits Account Type"
+  default     = "Free"
+
+  validation {
+    condition     = contains(["Free", "Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype)
+    error_message = "Must be a valid Sumo Logic Cloud Flex Credits Account type. List at https://help.sumologic.com/docs/manage/manage-subscription/cloud-flex-credits-accounts/ ."
+  }
+
+}
 variable "sumo_accessid" {
   type        = string
   description = "Sumo Logic Access ID"

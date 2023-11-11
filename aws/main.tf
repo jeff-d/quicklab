@@ -139,6 +139,7 @@ module "sumo" {
   project          = var.project
   environment      = var.environment
   notify           = var.notify
+  sumo_accounttype = var.sumo_accounttype
   sumo_accessid    = var.sumo_accessid
   sumo_accesskey   = var.sumo_accesskey
   sumo_env         = var.sumo_env
