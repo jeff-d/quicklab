@@ -10,3 +10,13 @@ output "rum_traces_url" {
   value       = try(sumologic_http_source.rum_traces["cluster"].url, null)
   # value       = var.create_cluster ? sumologic_http_source.rum_traces["cluster"].url : "n/a"
 }
+
+output "sumo_fields" {
+  description = "A list of existing Sumo Logic Fields"
+  value       = local.sumo_fields
+}
+
+output "sumo_extraction_rules" {
+  description = "A list of existing Sumo Logic Field Extraction Rules"
+  value       = local.sumo_extraction_rules
+}

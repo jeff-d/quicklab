@@ -11,14 +11,28 @@ data "aws_region" "current" {}
 data "sumologic_personal_folder" "this" {
   for_each = var.monitoring == "sumo" ? toset(["sumo"]) : toset([])
 }
+data "http" "sumo_fields" {
+  url = "${local.baseurl}/api/v1/fields"
+  request_headers = {
+    Authorization = "Basic ${base64encode(local.basicauth)}"
+  }
+}
+data "http" "sumo_field_extraction_rules" {
+  url = "${local.baseurl}/api/v1/extractionRules"
+  request_headers = {
+    Authorization = "Basic ${base64encode(local.basicauth)}"
+  }
+}
 
 locals {
-  module       = basename(abspath(path.module))
-  split_arn    = split("/", data.aws_caller_identity.current.arn)
-  aws_username = element(local.split_arn, length(local.split_arn) - 1)
-  aws_admins   = [local.aws_username, "administrator", "admin", "example1", "example2"]
-  baseurl      = var.sumo_env == "us1" ? "https://api.sumologic.com" : "https://api.${var.sumo_env}.sumologic.com"
-  basicauth    = "${var.sumo_accessid}:${var.sumo_accesskey}"
+  module                = basename(abspath(path.module))
+  split_arn             = split("/", data.aws_caller_identity.current.arn)
+  aws_username          = element(local.split_arn, length(local.split_arn) - 1)
+  aws_admins            = [local.aws_username, "administrator", "admin", "example1", "example2"]
+  baseurl               = var.sumo_env == "us1" ? "https://api.sumologic.com" : "https://api.${var.sumo_env}.sumologic.com"
+  basicauth             = "${var.sumo_accessid}:${var.sumo_accesskey}"
+  sumo_fields           = toset([for k, v in jsondecode(data.http.sumo_fields.response_body).data : v.fieldName])
+  sumo_extraction_rules = toset([for k, v in jsondecode(data.http.sumo_field_extraction_rules.response_body).data : v.name])
   app = {
     cloudtrail = {
       name        = "AWS CloudTrail"
@@ -30,7 +44,7 @@ locals {
       name        = "AWS Cost Explorer"
       uuid        = "14c40d09-f7d6-4162-a3f4-0f12b5fd04eb"
       description = "The Sumo Logic App for AWS Cost Explorer lets you visualize, understand, and manage your AWS costs and usage over time."
-      fields      = ["account", "linkedaccount"]
+      fields      = setsubtract(["account", "linkedaccount"], local.sumo_fields)
     }
     flowlogs = {
       name        = "Amazon VPC Flow Logs"
@@ -46,11 +60,11 @@ locals {
     }
   }
   fields = {
-    tags = ["labid", "prefix", "owner", "environment", "project", "createdby", "createdfor", "createdwith"]
-    otc  = ["host.group", "deployment.environment"]
+    tags = setsubtract(["labid", "prefix", "owner", "environment", "project", "createdby", "createdfor", "createdwith"], local.sumo_fields)
+    otc  = setsubtract(["host.group", "deployment.environment"], local.sumo_fields)
     resourcedetection = {
-      system = ["host.name", "host.id", "os.type"]
-      ec2    = ["cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"]
+      system = setsubtract(["host.name", "host.id", "os.type"], local.sumo_fields)
+      ec2    = setsubtract(["cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"], local.sumo_fields)
     }
   }
 }

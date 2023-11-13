@@ -69,6 +69,8 @@ resource "sumologic_cloudtrail_source" "this" {
   ]
 }
 resource "sumologic_http_source" "aws_admins" {
+  for_each = contains(["Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype) ? toset(["${var.sumo_accounttype}"]) : toset([])
+
   name                         = "cloudtrail-aws-admins"
   description                  = "Privileged AWS User IDs, uploaded via CSV, used with the CloudTrail App. Reference: https://help.sumologic.com/docs/integrations/amazon-aws/cloudtrail/#enable-sumo-logic-to-track-aws-admin-activity"
   category                     = "admin_users"
@@ -78,26 +80,28 @@ resource "sumologic_http_source" "aws_admins" {
   use_autoline_matching        = false
 }
 resource "local_file" "aws_admins" {
+  for_each = contains(["Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype) ? toset(["${var.sumo_accounttype}"]) : toset([])
+
   filename        = "${path.module}/admin_users.csv"
   file_permission = "0600"
   content         = join("\n", [for u in local.aws_admins : format("%s", u)])
 }
 resource "null_resource" "upload_aws_admins" {
+  for_each = contains(["Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype) ? toset(["${var.sumo_accounttype}"]) : toset([])
 
   depends_on = [sumologic_cloudtrail_source.this, sumologic_http_source.aws_admins]
 
   triggers = {
-    updated_admins_list = local_file.aws_admins.id
+    updated_admins_list = local_file.aws_admins["${var.sumo_accounttype}"].id
   }
 
   provisioner "local-exec" {
     command = <<-EOT
-    curl -s -X POST '${sumologic_http_source.aws_admins.url}' -T '${local_file.aws_admins.filename}'
+    curl -s -X POST '${sumologic_http_source.aws_admins["${var.sumo_accounttype}"].url}' -T '${local_file.aws_admins["${var.sumo_accounttype}"].filename}'
     EOT
   }
 }
 resource "sumologic_lookup_table" "aws_admins" {
-
   for_each = contains(["Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype) ? toset(["${var.sumo_accounttype}"]) : toset([])
 
   name = "aws-admins"
@@ -112,7 +116,6 @@ resource "sumologic_lookup_table" "aws_admins" {
   description       = "QuickLab AWS Admins"
 }
 resource "sumologic_content" "load_aws_admins" {
-
   for_each = contains(["Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype) ? toset(["${var.sumo_accounttype}"]) : toset([])
 
   parent_id = sumologic_folder.this.id

@@ -78,6 +78,8 @@ resource "sumologic_field" "costexplorer" {
   state      = "Enabled"
 }
 resource "sumologic_field_extraction_rule" "costexplorer" {
+  for_each = setsubtract(["AWS Cost Explorer"], local.sumo_extraction_rules)
+
   name             = "AWS Cost Explorer"
   scope            = "account = * region CostUsd CostType StartDate EndDate MetricType Granularity Service LinkedAccount"
   parse_expression = <<-EOT

@@ -48,32 +48,32 @@ variable "prefix" {
 variable "owner" {
   type        = string
   description = "a valid email address designating the resource's owner"
-  default     = " "
+  default     = "-"
 }
 variable "environment" {
   type        = string
   description = "Environment designation (e.g. dev, prod)."
-  default     = " "
+  default     = "-"
 }
 variable "project" {
   type        = string
   description = "Project name."
-  default     = " "
+  default     = "-"
 }
 variable "createdby" {
   type        = string
   description = "userid or API key of resource's creator"
-  default     = " "
+  default     = "-"
 }
 variable "createdfor" {
   type        = string
   description = "the resource creator's intention for this resource"
-  default     = " "
+  default     = "-"
 }
 variable "createdwith" {
   type        = string
   description = "mechanism by which this a resource was created"
-  default     = " "
+  default     = "-"
 }
 
 

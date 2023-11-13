@@ -27,13 +27,49 @@ quicklab/aws $  export TF_VAR_sumo_env=us1
 quicklab/aws $  export TF_VAR_sumo_org=000000000000000B
 ```
 
-## Fields
+## Fields & Extractions
 
 Sumo Logic [Fields](https://help.sumologic.com/docs/manage/fields/) are metadata (key-value pairs) that get applied to ingested telemetry and are used to query and filter signals. The following Sumo Logic use cases require QuickLab to create the associated set of Fields.
 
 - AWS Cost Explorer: "account", "linkedaccount"
 - AWS resource tags: "labid", "prefix", "owner", "environment", "project", "createdby", "createdfor", "createdwith"
 - QuickLab bastion (OpenTelemetry Collector): "host.group", "deployment.environment", "host.name", "host.id", "os.type", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"
+
+Sumo Logic [Field Extractions](https://help.sumologic.com/docs/manage/field-extractions/) can dynamically parse and assign values to Fields at ingest-time. QuickLab creates two Field Extraction Rules:
+
+- AWS Cost Explorer
+- VPC Flow Logs
+
+QuickLab checks to see if these Fields and Field Extractions already exist, and if so, does not create (so no risk of conflicts) them or import them into the terraform state (so no risk of accidental deletion). QuickLab records the list of existing Fields and Field Extraction Rule names it detects as a terraform ouput for the `sumo` module, which can be viewed using the terraform [console](https://developer.hashicorp.com/terraform/cli/commands/console):
+
+```
+$ terraform console
+> module.sumo["labid"]
+{
+  "rum_traces_url" = (known after apply)
+  "sumo_extraction_rules" = toset([
+    "My Custom FER",
+    "VPC Flow Logs",
+  ])
+  "sumo_fields" = toset([
+    "action",
+    "bar",
+    "baz",
+    "bytes",
+    "dest_ip",
+    "dest_port",
+    "foo",
+    "interfaceid",
+    "packets",
+    "protocol",
+    "src_ip",
+    "src_port",
+    "status",
+  ])
+}
+>exit
+$
+```
 
 ## App Catalog
 
