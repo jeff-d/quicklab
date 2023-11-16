@@ -52,7 +52,7 @@ resource "aws_iam_role" "irsa" {
   name               = "${var.prefix}-${var.uid}-${local.module}-irsa-role"
 
   tags = {
-    Module                    = local.module
+    Component                 = local.module
     createdby                 = var.creator
     "ServiceAccountName"      = "eks-irsa"
     "ServiceAccountNameSpace" = "kube-system"

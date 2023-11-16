@@ -14,12 +14,16 @@ set -o pipefail
 
 ## CONSTANTS
 scriptName="$(basename ${0})"
-rg=$(terraform output -raw _lab_resource_group)
+profile=$(terraform output -raw aws_profile)
+region=$(terraform output -raw aws_region)
+rg=$(terraform output -raw aws_resource_group)
 prefix=${rg%%-*}
 lab_id=$(terraform output -raw _lab_id)
 vpc_id=$(terraform output -raw network_id)
 vpc_name=$(
     aws ec2 describe-vpcs \
+      --profile $profile \
+      --region $region \
       --vpc-ids $vpc_id \
       --query 'Vpcs[0].{Name:Tags[?Key==`Name`]|[0].Value}' \
       --output text
@@ -41,6 +45,8 @@ function delete_instance(){
   # all non-terminated instances
   instance_ids=$(
     aws ec2 describe-instances \
+      --profile $profile \
+      --region $region \
       --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:CreatedWith,Values=create-server.sh" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
       --query 'Reservations[*].Instances[*].{InstanceId:InstanceId}' \
       --output text
@@ -53,6 +59,8 @@ function delete_instance(){
   else
 
     aws ec2 describe-instances \
+      --profile $profile \
+      --region $region \
       --instance-ids $instance_ids \
       --query 'Reservations[*].Instances[*].{InstanceId:InstanceId, Name:Tags[?Key==`Name`]|[0].Value, State:State.Name}' \
       --output table
@@ -61,6 +69,8 @@ function delete_instance(){
     printf "%s\n" "Instance:"
 
     aws ec2 terminate-instances \
+      --profile $profile \
+      --region $region \
       --instance-ids $instance_ids \
       > /dev/null
     
@@ -68,6 +78,8 @@ function delete_instance(){
 
       instance_name=$(
         aws ec2 describe-instances \
+          --profile $profile \
+        --region $region \
           --instance-id $instance \
           --query 'Reservations[0].Instances[0].{Name:Tags[?Key==`Name`]|[0].Value}' \
           --output text
@@ -75,6 +87,8 @@ function delete_instance(){
 
       instance_state=$(
         aws ec2 describe-instances \
+          --profile $profile \
+          --region $region \
           --instance-id $instance \
           --query 'Reservations[0].Instances[0].{State:State.Name}' \
           --output text
@@ -90,6 +104,8 @@ function delete_instance(){
 
         instance_state=$(
         aws ec2 describe-instances \
+          --profile $profile \
+          --region $region \
           --instance-id $instance \
           --query 'Reservations[0].Instances[0].{State:State.Name}' \
           --output text
@@ -115,6 +131,8 @@ function delete_keypair(){
 
   keypairs=$(
     aws ec2 describe-key-pairs \
+      --profile $profile \
+      --region $region \
       --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:CreatedWith,Values=create-server.sh" \
       --query 'KeyPairs[*].{KeyName:KeyName}' \
       --output text
@@ -129,6 +147,8 @@ function delete_keypair(){
     printf "%s\n" "Key Pairs:"
     keypairs=$(
     aws ec2 describe-key-pairs \
+      --profile $profile \
+      --region $region \
       --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:CreatedWith,Values=create-server.sh" \
       --query 'KeyPairs[*].{KeyName:KeyName}' \
       --output text
@@ -138,6 +158,8 @@ function delete_keypair(){
 
       printf "%s\n" "  $keypair"
       aws ec2 delete-key-pair \
+        --profile $profile \
+        --region $region \
         --key-name $keypair
 
       rm -f $keypair.pem 

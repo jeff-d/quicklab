@@ -31,8 +31,8 @@ locals {
   aws_admins            = [local.aws_username, "administrator", "admin", "example1", "example2"]
   baseurl               = var.sumo_env == "us1" ? "https://api.sumologic.com" : "https://api.${var.sumo_env}.sumologic.com"
   basicauth             = "${var.sumo_accessid}:${var.sumo_accesskey}"
-  sumo_fields           = toset([for k, v in jsondecode(data.http.sumo_fields.response_body).data : v.fieldName])
-  sumo_extraction_rules = toset([for k, v in jsondecode(data.http.sumo_field_extraction_rules.response_body).data : v.name])
+  sumo_fields           = toset([for i in jsondecode(data.http.sumo_fields.response_body).data : i.fieldName])
+  sumo_extraction_rules = toset([for i in jsondecode(data.http.sumo_field_extraction_rules.response_body).data : i.name])
   app = {
     cloudtrail = {
       name        = "AWS CloudTrail"
@@ -44,7 +44,7 @@ locals {
       name        = "AWS Cost Explorer"
       uuid        = "14c40d09-f7d6-4162-a3f4-0f12b5fd04eb"
       description = "The Sumo Logic App for AWS Cost Explorer lets you visualize, understand, and manage your AWS costs and usage over time."
-      fields      = setsubtract(["account", "linkedaccount"], local.sumo_fields)
+      fields      = ["account", "linkedaccount"] # setsubtract(["account", "linkedaccount"], local.sumo_fields) 
     }
     flowlogs = {
       name        = "Amazon VPC Flow Logs"
@@ -60,11 +60,11 @@ locals {
     }
   }
   fields = {
-    tags = setsubtract(["labid", "prefix", "owner", "environment", "project", "createdby", "createdfor", "createdwith"], local.sumo_fields)
-    otc  = setsubtract(["host.group", "deployment.environment"], local.sumo_fields)
+    tags    = ["labid", "prefix", "owner", "environment", "project", "createdby", "createdfor", "createdwith"]
+    otelcol = ["host.group", "deployment.environment"]
     resourcedetection = {
-      system = setsubtract(["host.name", "host.id", "os.type"], local.sumo_fields)
-      ec2    = setsubtract(["cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"], local.sumo_fields)
+      system = ["host.name", "host.id", "os.type"]
+      ec2    = ["cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"]
     }
   }
 }

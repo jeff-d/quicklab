@@ -20,3 +20,7 @@ output "sumo_extraction_rules" {
   description = "A list of existing Sumo Logic Field Extraction Rules"
   value       = local.sumo_extraction_rules
 }
+
+output "debug_fer_resp_data" {
+  value = jsondecode(data.http.sumo_field_extraction_rules.response_body).data
+}

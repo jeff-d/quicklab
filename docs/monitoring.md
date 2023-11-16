@@ -29,46 +29,50 @@ quicklab/aws $  export TF_VAR_sumo_org=000000000000000B
 
 ## Fields & Extractions
 
-Sumo Logic [Fields](https://help.sumologic.com/docs/manage/fields/) are metadata (key-value pairs) that get applied to ingested telemetry and are used to query and filter signals. The following Sumo Logic use cases require QuickLab to create the associated set of Fields.
-
-- AWS Cost Explorer: "account", "linkedaccount"
-- AWS resource tags: "labid", "prefix", "owner", "environment", "project", "createdby", "createdfor", "createdwith"
-- QuickLab bastion (OpenTelemetry Collector): "host.group", "deployment.environment", "host.name", "host.id", "os.type", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"
-
 Sumo Logic [Field Extractions](https://help.sumologic.com/docs/manage/field-extractions/) can dynamically parse and assign values to Fields at ingest-time. QuickLab creates two Field Extraction Rules:
 
 - AWS Cost Explorer
 - VPC Flow Logs
 
-QuickLab checks to see if these Fields and Field Extractions already exist, and if so, does not create (so no risk of conflicts) them or import them into the terraform state (so no risk of accidental deletion). QuickLab records the list of existing Fields and Field Extraction Rule names it detects as a terraform ouput for the `sumo` module, which can be viewed using the terraform [console](https://developer.hashicorp.com/terraform/cli/commands/console):
+By default QuickLab attempts to create (and manage) the Fields needed to satisfy supported Sumo Logic use cases. In cases where a Field Extraction Rule scope references a field that doesn't exist, this field will need to be created first. For example:
 
 ```
-$ terraform console
-> module.sumo["labid"]
-{
-  "rum_traces_url" = (known after apply)
-  "sumo_extraction_rules" = toset([
-    "My Custom FER",
-    "VPC Flow Logs",
-  ])
-  "sumo_fields" = toset([
-    "action",
-    "bar",
-    "baz",
-    "bytes",
-    "dest_ip",
-    "dest_port",
-    "foo",
-    "interfaceid",
-    "packets",
-    "protocol",
-    "src_ip",
-    "src_port",
-    "status",
-  ])
-}
->exit
-$
+╷
+│ Error: {"id":"N9S4I-MUP4W-REV65","errors":[{"code":"fer:invalid_extraction_rule","message":"Invalid Field Extraction Rule","meta":{"reason":"Invalid scope: account = * region CostUsd CostType StartDate EndDate MetricType Granularity Service LinkedAccount"}}]}
+│
+│   with module.sumo["vznw"].sumologic_field_extraction_rule.costexplorer["aws"],
+│   on modules/sumo/costexplorer.tf line 83, in resource "sumologic_field_extraction_rule" "costexplorer":
+│   83: resource "sumologic_field_extraction_rule" "costexplorer" {
+│
+```
+
+Sumo Logic [Fields](https://help.sumologic.com/docs/manage/fields/) are metadata (key-value pairs) that get applied to ingested telemetry and are used to query and filter signals. The following Sumo Logic use cases require certain Fields to be present. By default QuickLab attempts to create and manage these Fields, but exposes flags in `aws.auto.tfvars` to disable this behavior for cases where these Fields already exist.
+
+- AWS Cost Explorer: "account", "linkedaccount"
+- AWS resource tags: "labid", "prefix", "owner", "environment", "project", "createdby", "createdfor", "createdwith"
+- QuickLab bastion (OpenTelemetry Collector): "host.group", "deployment.environment", "host.name", "host.id", "os.type", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"
+
+If these tags already exist in the target Sumo Logic organization, Sumo Logic will return a `field:already_exists` error to terraform.
+
+For example:
+
+```
+╷
+│ Error: {"id":"S3Q7E-3EQS9-S3A4T","errors":[{"code":"field:already_exists","message":"Field with the given name already exists"}]}
+│
+│   with module.sumo["vznw"].sumologic_field.costexplorer["linkedaccount"],
+│   on modules/sumo/costexplorer.tf line 73, in resource "sumologic_field" "costexplorer":
+│   73: resource "sumologic_field" "costexplorer" {
+│
+╵
+╷
+│ Error: {"id":"UHPFY-Q7F2R-P1Z96","errors":[{"code":"field:already_exists","message":"Field with the given name already exists"}]}
+│
+│   with module.sumo["vznw"].sumologic_field.tags["owner"],
+│   on modules/sumo/main.tf line 25, in resource "sumologic_field" "tags":
+│   25: resource "sumologic_field" "tags" {
+│
+╵
 ```
 
 ## App Catalog

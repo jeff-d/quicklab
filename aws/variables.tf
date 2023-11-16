@@ -38,13 +38,12 @@ variable "monitoring" {
 #====================
 # Resources
 #====================
+# Naming & Tagging
 variable "prefix" {
   type        = string
   description = "Resource naming prefix"
   default     = "quicklab"
 }
-
-# Tags
 variable "owner" {
   type        = string
   description = "a valid email address designating the resource's owner"
@@ -76,10 +75,7 @@ variable "createdwith" {
   default     = "-"
 }
 
-
-#====================
 # Remote Access
-#====================
 variable "remoteaccesscidrs" {
   type        = list(string)
   description = "An IPv4 CIDR, expressed in slash notation, that is allowed to access systems inside the created Quicklab Network. Example: 1.2.3.4/20"
@@ -96,46 +92,34 @@ variable "remoteaccesscidrs" {
 
 
 #====================
-# Monitoring
-#====================
-variable "aws_account_name" {
-  type        = string
-  description = "A friendly name for the AWS Account to use with Sumo Logic Collection."
-  default     = "my-aws-account"
-}
-variable "notify" {
-  type        = string
-  description = "an email recipient for sumo-related nofitications for operational and collection issues"
-  default     = null
-}
-
-
-#====================
-# Terraform providers
+# Cloud Provider
 #====================
 # AWS
 variable "aws_profile" {
   type        = string
   description = "AWS CLI Profile."
-  default     = null # defers to 'default' AWS CLI profile value
+  default     = "default" # null defers to 'default' AWS CLI profile value
 }
 variable "aws_region" {
   type        = string
   description = "AWS Region."
   default     = null # defers to 'default' AWS CLI profile value
 }
-
-# Sumo Logic
-variable "sumo_accounttype" {
+variable "aws_account_name" {
   type        = string
-  description = "Sumo Logic Cloud Flex Credits Account Type"
-  default     = "Free"
+  description = "A friendly name for the AWS Account to use with Sumo Logic Collection."
+  default     = "my-aws-account"
+}
 
-  validation {
-    condition     = contains(["Free", "Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype)
-    error_message = "Must be a valid Sumo Logic Cloud Flex Credits Account type. List at https://help.sumologic.com/docs/manage/manage-subscription/cloud-flex-credits-accounts/ ."
-  }
 
+#====================
+# Monitoring
+#====================
+# Sumo Logic
+variable "sumo_org" {
+  type        = string
+  description = "Sumo Logic Organization ID"
+  default     = "unspecified"
 }
 variable "sumo_accessid" {
   type        = string
@@ -158,8 +142,49 @@ variable "sumo_env" {
   }
 
 }
-variable "sumo_org" {
+variable "sumo_accounttype" {
   type        = string
-  description = "Sumo Logic Organization ID"
-  default     = "unspecified"
+  description = "Sumo Logic Cloud Flex Credits Account Type"
+  default     = "Free"
+
+  validation {
+    condition     = contains(["Free", "Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite"], var.sumo_accounttype)
+    error_message = "Must be a valid Sumo Logic Cloud Flex Credits Account type. List at https://help.sumologic.com/docs/manage/manage-subscription/cloud-flex-credits-accounts/ ."
+  }
+
+}
+variable "notify" {
+  type        = string
+  description = "an email recipient for sumo-related nofitications for operational and collection issues"
+  default     = null
+}
+variable "create_tag_fields" {
+  type        = bool
+  description = "Feature flag creating Fields for QuickLab resource tags. Set to \"false\" to disable."
+  default     = true
+}
+variable "create_app_fields" {
+  type        = bool
+  description = "Feature flag creating fields needed by Sumo Logic App Catalog Apps. Set to \"false\" to disable."
+  default     = true
+}
+variable "create_bastion_otelcol_fields" {
+  type        = bool
+  description = "Feature flag creating OpenTelemetry collector Fields for the QuickLab Bastion. Set to \"false\" to disable."
+  default     = true
+}
+variable "create_bastion_otelsystem_fields" {
+  type        = bool
+  description = "Feature flag creating OpenTelemetry system resourcedetection Fields for the QuickLab Bastion. Set to \"false\" to disable."
+  default     = true
+}
+variable "create_bastion_otelec2_fields" {
+  type        = bool
+  description = "Feature flag creating OpenTelemetry EC2 resourcedetection Fields for the QuickLab Bastion. Set to \"false\" to disable."
+  default     = true
+}
+variable "create_app_field_extraction_rules" {
+  type        = bool
+  description = "Feature flag creating field extraction rules needed by Sumo Logic App Catalog Apps. Set to \"false\" to disable."
+  default     = true
 }

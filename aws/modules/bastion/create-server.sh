@@ -14,11 +14,20 @@ set -o pipefail
 
 ## CONSTANTS
 scriptName="$(basename ${0})"
-rg=$(terraform output -raw _lab_resource_group)
+profile=$(terraform output -raw aws_profile)
+region=$(terraform output -raw aws_region)
+rg=$(terraform output -raw aws_resource_group)
 prefix=${rg%%-*}
 lab_id=$(terraform output -raw _lab_id)
 vpc_id=$(terraform output -raw network_id)
-vpc_name=$( aws ec2 describe-vpcs --vpc-ids $vpc_id --query 'Vpcs[0].{Name:Tags[?Key==`Name`]|[0].Value}' --output text)
+vpc_name=$(
+  aws ec2 describe-vpcs \
+    --profile $profile \
+    --region $region \
+    --vpc-ids $vpc_id \
+    --query 'Vpcs[0].{Name:Tags[?Key==`Name`]|[0].Value}' \
+    --output text
+)
 
 
 ## FUNCTIONS
@@ -112,7 +121,7 @@ function localhost_rdp () {
 # OPTIONS
 function get_opts() {
   
-  system="unspecified"
+  system="linux"
 
   local OPTIND
   while getopts ":c:s:" option; do
@@ -141,6 +150,8 @@ function get_opts() {
     type="t3.micro"
     sgid=$(
       aws ec2 describe-security-groups \
+        --profile $profile \
+        --region $region \
         --filters Name=vpc-id,Values=$vpc_id Name=group-name,Values=bastion-remote-access-ssh \
         --query "SecurityGroups[*].GroupId" \
         --output text
@@ -155,6 +166,8 @@ function get_opts() {
     type="t3.large"
     sgid=$(
       aws ec2 describe-security-groups \
+        --profile $profile \
+        --region $region \
         --filters Name=vpc-id,Values=$vpc_id Name=group-name,Values=bastion-remote-access-rdp \
         --query "SecurityGroups[*].GroupId" \
         --output text
@@ -179,14 +192,18 @@ function create_instance(){
   
   priv_subnet_a=$(
     aws ec2 describe-subnets \
-      --filters Name=vpc-id,Values=$vpc_id "Name=tag:Name,Values=*private*" "Name=availability-zone,Values=us-west-2a" \
+      --profile $profile \
+      --region $region \
+      --filters Name=vpc-id,Values=$vpc_id "Name=tag:Name,Values=*private*" "Name=availability-zone,Values=${region}a" \
       --query 'Subnets[*].{SubnetId:SubnetId}' \
       --output text
   )
 
   priv_subnet_b=$(
     aws ec2 describe-subnets \
-      --filters Name=vpc-id,Values=$vpc_id "Name=tag:Name,Values=*private*" "Name=availability-zone,Values=us-west-2b" \
+      --profile $profile \
+      --region $region \
+      --filters Name=vpc-id,Values=$vpc_id "Name=tag:Name,Values=*private*" "Name=availability-zone,Values=${region}b" \
       --query 'Subnets[*].{SubnetId:SubnetId}' \
       --output text
   )
@@ -198,16 +215,42 @@ function create_instance(){
     rand=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | head -c 6) || (ec=$? ; if [ "$ec" -eq 141 ]; then exit 0; else exit "$ec"; fi)
     timestamp=$(date "+%Y%m%d-%H%M%S")
     subnet_id=$(shuffle "$priv_subnet_a" "$priv_subnet_b")
-  
+
+    # create and use new keypair for each instance
+    # create_keypair
+    # keyname=$(
+    #   aws ec2 describe-key-pairs \
+    #     --profile $profile \
+    #     --region $region \
+    #     --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=$prefix-$lab_id-$system-$rand" "Name=tag:CreatedWith,Values=$scriptname" \
+    #     --query 'KeyPairs[*].{KeyName:KeyName}' \
+    #     --output text
+    # )
+    
+    # use QuickLab VPC keypair for all instances
     keyname=$(
       aws ec2 describe-key-pairs \
+        --profile $profile \
+        --region $region \
         --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:CreatedWith,Values=terraform cli" \
+        --query 'KeyPairs[*].{KeyName:KeyName}' \
+        --output text
+    )
+
+    # use QuickLab VPC keypair for all instances
+    keyname=$(
+      aws ec2 describe-key-pairs \
+        --profile $profile \
+        --region $region \
+        --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=$prefix-$lab_id-$system-$rand" "Name=tag:CreatedWith,Values=$scriptname" \
         --query 'KeyPairs[*].{KeyName:KeyName}' \
         --output text
     )
 
     instance_id=$(
       aws ec2 run-instances \
+      --profile $profile \
+      --region $region \
       --image-id $image_id \
       --instance-type $type \
       --key-name $keyname \
@@ -221,6 +264,8 @@ function create_instance(){
 
     instance_name=$(
       aws ec2 describe-instances \
+        --profile $profile \
+        --region $region \
         --instance-id $instance_id \
         --query 'Reservations[0].Instances[0].{Name:Tags[?Key==`Name`]|[0].Value}' \
         --output text
@@ -228,6 +273,8 @@ function create_instance(){
 
     instance_priv_dns=$(
       aws ec2 describe-instances \
+        --profile $profile \
+        --region $region \
         --instance-id $instance_id \
         --query 'Reservations[0].Instances[0].{PrivateDnsName:PrivateDnsName}' \
         --output text
@@ -235,6 +282,8 @@ function create_instance(){
 
     instance_state=$(
       aws ec2 describe-instances \
+        --profile $profile \
+        --region $region \
         --instance-id $instance_id \
         --query 'Reservations[0].Instances[0].{State:State.Name}' \
         --output text
@@ -250,6 +299,8 @@ function create_instance(){
 
         instance_state=$(
         aws ec2 describe-instances \
+          --profile $profile \
+          --region $region \
           --instance-id $instance_id \
           --query 'Reservations[0].Instances[0].{State:State.Name}' \
           --output text
@@ -274,9 +325,11 @@ function create_keypair(){
 
   instance_kp=$(
     aws ec2 create-key-pair \
+      --profile $profile \
+      --region $region \
       --key-name $prefix-$lab_id-$system-$rand \
       --query 'KeyMaterial' \
-      --tag-specifications "ResourceType=key-pair,Tags=[{Key=Name,Value=$prefix-$lab_id-$system-$rand}, {Key=LabId,Value=$lab_id}, {Key=CreatedWith,Value=create-instance}]" \
+      --tag-specifications "ResourceType=key-pair,Tags=[{Key=Name,Value=$prefix-$lab_id-$system-$rand}, {Key=LabId,Value=$lab_id}, {Key=CreatedWith,Value=$scriptname}]" \
       --output text \
       > $prefix-$lab_id-$system-$rand.pem
   )
@@ -290,19 +343,25 @@ function summary() {
 
   if [[ "$system" == "linux" ]]; then
     aws ec2 describe-instances \
+      --profile $profile \
+      --region $region \
       --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*linux*" "Name=tag:CreatedWith,Values=$scriptName" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
       --query 'Reservations[*].Instances[*].{InstanceId:InstanceId, Name:Tags[?Key==`Name`]|[0].Value, PrivateDnsName:PrivateDnsName, State:State.Name}' \
       --output table
 
     instance_id=$(
       aws ec2 describe-instances \
-      --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*linux*" "Name=tag:CreatedWith,Values=$scriptName" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
-      --query 'Reservations[0].Instances[0].{InstanceId:InstanceId}' \
-      --output text
+        --profile $profile \
+        --region $region \
+        --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*linux*" "Name=tag:CreatedWith,Values=$scriptName" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
+        --query 'Reservations[0].Instances[0].{InstanceId:InstanceId}' \
+        --output text
     )
     
     instance_priv_dns=$(
       aws ec2 describe-instances \
+        --profile $profile \
+        --region $region \
         --instance-id $instance_id \
         --query 'Reservations[0].Instances[0].{PrivateDnsName:PrivateDnsName}' \
         --output text
@@ -317,19 +376,25 @@ function summary() {
 
   elif [[ "$system" == "windows" ]]; then
     aws ec2 describe-instances \
+      --profile $profile \
+      --region $region \
       --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*windows*" "Name=tag:CreatedWith,Values=$scriptName" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
       --query 'Reservations[*].Instances[*].{InstanceId:InstanceId, Name:Tags[?Key==`Name`]|[0].Value, PrivateDnsName:PrivateDnsName, State:State.Name}' \
       --output table
 
     instance_id=$(
       aws ec2 describe-instances \
-      --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*windows*" "Name=tag:CreatedWith,Values=$scriptName" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
-      --query 'Reservations[0].Instances[0].{InstanceId:InstanceId}' \
-      --output text
+        --profile $profile \
+        --region $region \
+        --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*windows*" "Name=tag:CreatedWith,Values=$scriptName" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
+        --query 'Reservations[0].Instances[0].{InstanceId:InstanceId}' \
+        --output text
     )
     
     instance_priv_dns=$(
       aws ec2 describe-instances \
+        --profile $profile \
+        --region $region \
         --instance-id $instance_id \
         --query 'Reservations[0].Instances[0].{PrivateDnsName:PrivateDnsName}' \
         --output text

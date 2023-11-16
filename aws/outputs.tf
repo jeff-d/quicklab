@@ -9,7 +9,7 @@ output "_lab_id" {
   description = "a unique Lab Id generated when creating an empty QuickLab."
   value       = try(local.uid, null)
 }
-output "_lab_resource_group" {
+output "aws_resource_group" {
   description = "the Group containing all AWS resources associated wth this Lab Id."
   value       = try(aws_resourcegroups_group.this.name, null)
 }
@@ -23,6 +23,10 @@ output "aws_caller" {
 output "aws_region" {
   description = "AWS Region"
   value       = try(data.aws_region.current.name, null)
+}
+output "aws_profile" {
+  description = "AWS CLI Profile name"
+  value       = var.aws_profile
 }
 
 

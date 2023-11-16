@@ -4,7 +4,7 @@
 # SPDX-FileCopyrightText: © 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-
+variable "aws_profile" {}
 variable "uid" {}
 variable "prefix" {}
 variable "creator" {}

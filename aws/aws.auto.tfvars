@@ -23,9 +23,8 @@ monitoring     = "none" # (string) Valid values include "none" or "sumo".
 #====================
 # Resources
 #====================
-# prefix      = "quicklab"
-
-# Tags
+# Naming & Tagging
+prefix      = "quicklab"
 project     = "my-project"
 environment = "dev"
 createdfor  = "testing"
@@ -33,30 +32,34 @@ createdwith = "terraform cli"
 # owner       = "user@company.com" 
 # createdby   = "me" # defaults to AWS IAM username
 
+# Remote Access
+# remoteaccesscidrs = [ "1.2.3.4/32", "5.6.7.8/32" ] # limit to 5 entries, 0.0.0.0/0 is not allowed
+
 
 #====================
-# Remote Access
+# Cloud Provider
 #====================
-# remoteaccesscidrs = [ "1.2.3.4/32", "5.6.7.8/32" ] # limit to 5 entries, 0.0.0.0/0 is not allowed
+# AWS
+# aws_profile = "my-cli-profile"
+# aws_region  = "us-west-2"
+# aws_account_name = "my-aws-account" # displays in Sumo Logic
 
 
 #====================
 # Monitoring
 #====================
-# aws_account_name = "my-aws-account" # displays in Sumo Logic
-# notify = "user@company.com" # an email recipient for sumo-related nofitications for operational and collection issues
-
-
-#====================
-# Terraform providers
-#====================
-# AWS
-# aws_profile = "my-cli-profile"
-# aws_region  = "us-west-2"
-
 # Sumo Logic
-# sumo_accounttype = "Enterprise Suite" # ("Free", "Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite")
 # sumo_org = ""
 # sumo_accessid  = ""
 # sumo_accesskey = ""
 # sumo_env = "" # (lowercase "us1", "us2", "de", et al)
+# sumo_accounttype = "Enterprise Suite" # ("Free", "Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite")
+# notify = "user@company.com" # an email recipient for sumo-related nofitications for operational and collection issues
+# create_tag_fields = false 
+# create_app_fields = false 
+# create_bastion_otelcol_fields = false 
+# create_bastion_otelsystem_fields = false 
+# create_bastion_otelec2_fields = false 
+# create_app_field_extraction_rules = false
+
+

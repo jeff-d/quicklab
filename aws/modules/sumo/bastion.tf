@@ -14,22 +14,22 @@ resource "sumologic_token" "this" {
 }
 
 # Sumo Logic Fields sent via otelcol-sumo
-resource "sumologic_field" "otc" {
-  for_each = var.create_bastion ? toset(local.fields.otc) : toset([])
+resource "sumologic_field" "otelcol" {
+  for_each = var.create_bastion && var.create_bastion_otelcol_fields ? toset(local.fields.otelcol) : toset([])
 
   field_name = each.key
   data_type  = "String"
   state      = "Enabled"
 }
 resource "sumologic_field" "system" {
-  for_each = var.create_bastion ? toset(local.fields.resourcedetection.system) : toset([])
+  for_each = var.create_bastion && var.create_bastion_otelsystem_fields ? toset(local.fields.resourcedetection.system) : toset([])
 
   field_name = each.key
   data_type  = "String"
   state      = "Enabled"
 }
 resource "sumologic_field" "ec2" {
-  for_each = var.create_bastion ? toset(local.fields.resourcedetection.ec2) : toset([])
+  for_each = var.create_bastion && var.create_bastion_otelec2_fields ? toset(local.fields.resourcedetection.ec2) : toset([])
 
   field_name = each.key
   data_type  = "String"

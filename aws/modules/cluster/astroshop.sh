@@ -17,6 +17,8 @@ set -o pipefail
 
 ## CONSTANTS
 scriptName="$(basename ${0})"
+profile=$(terraform output -raw aws_profile)
+region=$(terraform output -raw aws_region)
 lab=$(terraform output -raw _lab_id)
 release=otel-demo
 ns=apps
@@ -162,16 +164,15 @@ function install() {
   printf "%s\n" "Installing AstronomyShop components:"
 
   # add open-telemetry helm repo
-  printf "%s\n" "  + helm repo"
-  helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts | awk '{ print "    " $0; }'
-
-  helm repo update | awk '{ print "    " $0; }'
+  # printf "%s\n" "  + helm repo"
+  # helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts | awk '{ print "    " $0; }'
+  # helm repo update | awk '{ print "    " $0; }'
 
   # create helm release
   timestamp=$(date +"%r")
   printf "%s\n" "  + helm release (~5m from $timestamp)"
   # --values $values
-  helm upgrade -i $release $chart --values $values --atomic --namespace $ns --create-namespace > /dev/null | awk '{ print "  " $0; }'
+  helm upgrade -i $release $chart --atomic --namespace $ns --create-namespace > /dev/null | awk '{ print "  " $0; }'
   timestamp=$(date +"%r")
   printf "%s\n" "    ($timestamp) release $release created successfully in namespace $ns from chart $chart"
 
@@ -198,7 +199,14 @@ function install() {
   printf "%s\n" "    ($timestamp)"
 
   # installation summary
-  dnsname=$(aws elbv2 describe-load-balancers --names=$lbname --query "LoadBalancers[0].DNSName" --output text)
+  dnsname=$(
+    aws elbv2 describe-load-balancers \
+      --profile $profile \
+      --region $region \
+      --names=$lbname \
+      --query "LoadBalancers[0].DNSName" \
+      --output text
+  )
   app="http://$dnsname"
 
   printf "%s\n"

@@ -24,3 +24,9 @@ variable "create_cluster" {}
 variable "vpc" {}
 variable "cwl_flowlogs" {}
 variable "bastion_role" {}
+variable "create_tag_fields" {}
+variable "create_app_fields" {}
+variable "create_bastion_otelcol_fields" {}
+variable "create_bastion_otelsystem_fields" {}
+variable "create_bastion_otelec2_fields" {}
+variable "create_app_field_extraction_rules" {}

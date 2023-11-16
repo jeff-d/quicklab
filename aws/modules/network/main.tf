@@ -32,7 +32,7 @@ resource "aws_ec2_managed_prefix_list" "vpc" {
   }
 
   tags = {
-    Module      = local.module
+    Component   = local.module
     Description = "VPC CIDRs"
     CreatedBy   = var.creator
   }
@@ -56,7 +56,7 @@ resource "aws_ec2_managed_prefix_list" "remote_access" {
   }
 
   tags = {
-    Module      = local.module
+    Component   = local.module
     Description = "Authorized Remote Access CIDRs"
     CreatedBy   = var.creator
   }

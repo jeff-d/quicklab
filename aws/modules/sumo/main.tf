@@ -23,7 +23,7 @@ resource "sumologic_folder" "this" {
 # Fields
 # https://help.sumologic.com/docs/manage/fields/
 resource "sumologic_field" "tags" {
-  for_each = toset(local.fields.tags)
+  for_each = var.create_tag_fields ? toset(local.fields.tags) : toset([])
 
   field_name = each.key
   data_type  = "String"

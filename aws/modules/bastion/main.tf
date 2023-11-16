@@ -205,6 +205,10 @@ resource "aws_iam_role" "bastion" {
   }
 
 }
+resource "time_sleep" "bastion_role" {
+  depends_on      = [aws_iam_role.bastion]
+  create_duration = "15s" # aaccommodates a delay in role creation which can render invalid the principal reference in module.sumo["xxyy"].data.aws_iam_policy_document.secret_resource_policy
+}
 data "aws_iam_policy_document" "bastion_trust" {
   statement {
     sid     = ""

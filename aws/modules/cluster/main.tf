@@ -72,7 +72,7 @@ resource "null_resource" "kubeconfig" {
   }
 
   provisioner "local-exec" {
-    command = "aws eks --region ${data.aws_region.current.name} update-kubeconfig --kubeconfig ~/.kube/${aws_eks_cluster.this.name} --name ${aws_eks_cluster.this.name} --alias ${aws_eks_cluster.this.name} --user-alias ${aws_eks_cluster.this.name}"
+    command = "aws eks --profile ${var.aws_profile} --region ${data.aws_region.current.name} update-kubeconfig --kubeconfig ~/.kube/${aws_eks_cluster.this.name} --name ${aws_eks_cluster.this.name} --alias ${aws_eks_cluster.this.name} --user-alias ${aws_eks_cluster.this.name}"
   }
 
   triggers = {
@@ -197,7 +197,7 @@ resource "aws_autoscaling_group_tag" "module" {
   autoscaling_group_name = aws_eks_node_group.this.resources[0].autoscaling_groups[0].name
 
   tag {
-    key                 = "Module"
+    key                 = "Component"
     value               = local.module
     propagate_at_launch = true
   }

@@ -71,16 +71,18 @@ resource "sumologic_cloud_to_cloud_source" "costexplorer" {
   ]
 }
 resource "sumologic_field" "costexplorer" {
-  for_each = toset(local.app.costexplorer.fields)
+  for_each = var.create_app_fields ? toset(local.app.costexplorer.fields) : toset([])
 
   field_name = each.key
   data_type  = "String"
   state      = "Enabled"
+
+  # depends_on = sumologic_field_extraction_rule.costexplorer # FER must be deleted before the fields referenced in it
+
 }
 resource "sumologic_field_extraction_rule" "costexplorer" {
-  for_each = setsubtract(["AWS Cost Explorer"], local.sumo_extraction_rules)
-
-  name             = "AWS Cost Explorer"
+  for_each         = var.create_app_field_extraction_rules ? toset(["aws"]) : toset([])
+  name             = "${var.prefix}-${var.uid} - AWS Cost Explorer"
   scope            = "account = * region CostUsd CostType StartDate EndDate MetricType Granularity Service LinkedAccount"
   parse_expression = <<-EOT
     json "LinkedAccount"
@@ -91,10 +93,10 @@ resource "sumologic_field_extraction_rule" "costexplorer" {
   enabled          = true
 
   depends_on = [
+    # fields referenced in FER must be created before FER in order for FER scope to be valid
     sumologic_field.costexplorer["account"],
     sumologic_field.costexplorer["linkedaccount"]
   ]
-
 }
 
 
@@ -106,6 +108,13 @@ resource "aws_iam_access_key" "costexplorer" {
 resource "aws_iam_user" "costexplorer" {
   name = "${var.prefix}-${var.uid}-sumo-costexplorer"
   path = "/"
+
+  tags = {
+    Component = local.module
+    Name      = "${var.prefix}-${var.uid}-sumo-costexplorer"
+    CreatedBy = var.creator
+  }
+
 }
 data "aws_iam_policy_document" "costexplorer" {
   statement {

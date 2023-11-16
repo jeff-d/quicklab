@@ -55,8 +55,8 @@ resource "sumologic_http_source" "flowlogs" {
   }
 }
 resource "sumologic_field_extraction_rule" "flowlogs" {
-  for_each         = var.create_network && length(setsubtract(["VPC Flow Logs"], local.sumo_extraction_rules)) > 0 ? toset(["network"]) : toset([])
-  name             = "VPC Flow Logs"
+  for_each         = var.create_network && var.create_app_field_extraction_rules ? toset(["network"]) : toset([])
+  name             = "${var.prefix}-${var.uid} - VPC Flow Logs"
   scope            = "_sourceCategory=${var.prefix}/${var.uid}/aws/*/network/flowlogs"
   parse_expression = <<-EOT
     json "message" as _rawvpc nodrop

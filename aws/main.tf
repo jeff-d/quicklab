@@ -111,6 +111,7 @@ module "cluster" {
   source   = "./modules/cluster"
 
   uid                         = local.uid
+  aws_profile                 = var.aws_profile
   prefix                      = var.prefix
   creator                     = local.aws_username
   project                     = var.project
@@ -132,23 +133,29 @@ module "sumo" {
   for_each = var.monitoring == "sumo" ? toset(["${local.uid}"]) : toset([])
   source   = "./modules/sumo"
 
-  aws_account_name = var.aws_account_name
-  monitoring       = var.monitoring
-  uid              = local.uid
-  prefix           = var.prefix
-  project          = var.project
-  environment      = var.environment
-  notify           = var.notify
-  sumo_accounttype = var.sumo_accounttype
-  sumo_accessid    = var.sumo_accessid
-  sumo_accesskey   = var.sumo_accesskey
-  sumo_env         = var.sumo_env
-  sumo_org         = var.sumo_org
-  creator          = local.aws_username
-  create_network   = var.create_network
-  create_bastion   = var.create_bastion
-  create_cluster   = var.create_cluster
-  vpc              = length(module.network) > 0 ? module.network["${local.uid}"].vpc : null
-  cwl_flowlogs     = length(module.network) > 0 ? module.network["${local.uid}"].cwlog_group_flowlogs : null
-  bastion_role     = length(module.bastion) > 0 ? module.bastion["${local.uid}"].bastion_role : null
+  aws_account_name                  = var.aws_account_name
+  monitoring                        = var.monitoring
+  uid                               = local.uid
+  prefix                            = var.prefix
+  project                           = var.project
+  environment                       = var.environment
+  notify                            = var.notify
+  sumo_accounttype                  = var.sumo_accounttype
+  sumo_accessid                     = var.sumo_accessid
+  sumo_accesskey                    = var.sumo_accesskey
+  sumo_env                          = var.sumo_env
+  sumo_org                          = var.sumo_org
+  creator                           = local.aws_username
+  create_network                    = var.create_network
+  create_bastion                    = var.create_bastion
+  create_cluster                    = var.create_cluster
+  vpc                               = length(module.network) > 0 ? module.network["${local.uid}"].vpc : null
+  cwl_flowlogs                      = length(module.network) > 0 ? module.network["${local.uid}"].cwlog_group_flowlogs : null
+  bastion_role                      = length(module.bastion) > 0 ? module.bastion["${local.uid}"].bastion_role : null
+  create_tag_fields                 = var.create_tag_fields
+  create_app_fields                 = var.create_app_fields
+  create_bastion_otelcol_fields     = var.create_bastion_otelcol_fields
+  create_bastion_otelsystem_fields  = var.create_bastion_otelsystem_fields
+  create_bastion_otelec2_fields     = var.create_bastion_otelec2_fields
+  create_app_field_extraction_rules = var.create_app_field_extraction_rules
 }
