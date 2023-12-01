@@ -98,7 +98,7 @@ variable "remoteaccesscidrs" {
 variable "aws_profile" {
   type        = string
   description = "AWS CLI Profile."
-  default     = "default" # null defers to 'default' AWS CLI profile value
+  default     = "default"
 }
 variable "aws_region" {
   type        = string

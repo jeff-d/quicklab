@@ -176,7 +176,7 @@ resource "aws_cloudtrail" "this" {
 }
 # Bucket - store the logs
 resource "aws_s3_bucket" "trail" {
-  bucket_prefix = "${var.prefix}-${var.uid}-cloudtrail-${data.aws_region.current.name}-"
+  bucket_prefix = "${var.prefix}-${var.uid}-ct-${data.aws_region.current.name}-"
   force_destroy = true # removes bucket objects upon bucket destroy
 
   depends_on = [aws_sns_topic.trail] # ref: https://repost.aws/knowledge-center/unable-validate-destination-s3
