@@ -14,10 +14,10 @@
 #====================
 # Components
 #====================
-create_network = false  # (bool)
-create_bastion = false  # (bool)
-create_cluster = false  # (bool)
-monitoring     = "none" # (string) Valid values include "none" or "sumo".
+create_network = false
+create_bastion = false
+create_cluster = false
+monitoring     = "none" # "none" or "sumo"
 
 
 #====================
@@ -52,8 +52,8 @@ createdwith = "terraform cli"
 # sumo_org = ""
 # sumo_accessid  = ""
 # sumo_accesskey = ""
-# sumo_env = "" # (lowercase "us1", "us2", "de", et al)
-# sumo_accounttype = "Enterprise Suite" # ("Free", "Trial", "Essentials", "Enterprise Operations", "Enterprise Security", "Enterprise Suite")
+# sumo_env = "" # lowercase "us1", "us2", "de", et al
+# sumo_accounttype = "Enterprise Suite" # "Free" or "Enterprise Suite".
 # notify = "user@company.com" # an email recipient for sumo-related nofitications for operational and collection issues
 # create_tag_fields = false 
 # create_app_fields = false 
@@ -61,5 +61,3 @@ createdwith = "terraform cli"
 # create_bastion_otelsystem_fields = false 
 # create_bastion_otelec2_fields = false 
 # create_app_field_extraction_rules = false
-
-

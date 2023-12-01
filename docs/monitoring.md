@@ -50,6 +50,7 @@ Sumo Logic [Fields](https://help.sumologic.com/docs/manage/fields/) are metadata
 
 - AWS Cost Explorer: "account", "linkedaccount"
 - AWS resource tags: "labid", "prefix", "owner", "environment", "project", "createdby", "createdfor", "createdwith"
+- AWS VPC Flow Logs: "version", "accountID", "interfaceID", "src_ip", "dest_ip", "src_port", "dest_port", "Protocol", "Packets", "bytes", "StartSample", "EndSample", "Action", "status"
 - QuickLab bastion (OpenTelemetry Collector): "host.group", "deployment.environment", "host.name", "host.id", "os.type", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "host.image.id", "host.type"
 
 If these tags already exist in the target Sumo Logic organization, Sumo Logic will return a `field:already_exists` error to terraform.
