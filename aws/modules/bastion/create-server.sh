@@ -226,23 +226,13 @@ function create_instance(){
     #     --query 'KeyPairs[*].{KeyName:KeyName}' \
     #     --output text
     # )
-    
-    # use QuickLab VPC keypair for all instances
-    keyname=$(
-      aws ec2 describe-key-pairs \
-        --profile $profile \
-        --region $region \
-        --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:CreatedWith,Values=terraform cli" \
-        --query 'KeyPairs[*].{KeyName:KeyName}' \
-        --output text
-    )
 
     # use QuickLab VPC keypair for all instances
     keyname=$(
       aws ec2 describe-key-pairs \
         --profile $profile \
         --region $region \
-        --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=$prefix-$lab_id-$system-$rand" "Name=tag:CreatedWith,Values=$scriptname" \
+        --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:CreatedWith,Values=terraform cli" \
         --query 'KeyPairs[*].{KeyName:KeyName}' \
         --output text
     )
