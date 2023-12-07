@@ -290,7 +290,7 @@ resource "aws_iam_role" "sumo" {
 }
 resource "time_sleep" "sumo_role" {
   depends_on      = [aws_iam_role.sumo]
-  create_duration = "15s" # aaccommodates slight delay in Sumo Logic assuming the new IAM role for the first time
+  create_duration = "30s" # aaccommodates slight delay in Sumo Logic assuming the new IAM role for the first time
 }
 data "aws_iam_policy_document" "sumo_trust" {
   statement {
