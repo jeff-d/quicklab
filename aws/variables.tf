@@ -130,6 +130,7 @@ variable "sumo_accesskey" {
   type        = string
   description = "Sumo Logic Access Key"
   default     = "unspecified"
+  sensitive   = true
 }
 variable "sumo_env" {
   type        = string
