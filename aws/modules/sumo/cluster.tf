@@ -228,7 +228,6 @@ resource "aws_cloudwatch_event_rule" "dlq_eks" {
   name                = "${var.prefix}-${var.uid}-SumoCWProcessDLQScheduleRule-eks"
   description         = "Events rule for Cron"
   schedule_expression = "rate(5 minutes)"
-  is_enabled          = true
 
   tags = {
     Component = local.module

@@ -247,7 +247,6 @@ resource "aws_cloudwatch_event_rule" "dlq_flowlogs" {
   name                = "${var.prefix}-${var.uid}-SumoCWProcessDLQScheduleRule-flowlogs"
   description         = "Events rule for Cron"
   schedule_expression = "rate(5 minutes)"
-  is_enabled          = true
 
   tags = {
     Component = local.module
