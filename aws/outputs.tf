@@ -26,7 +26,7 @@ output "aws_region" {
 }
 output "aws_profile" {
   description = "AWS CLI Profile name"
-  value       = try(var.aws_region != "default", null)
+  value       = var.aws_profile != "default" ? var.aws_profile : null
 }
 
 
