@@ -182,7 +182,7 @@ function install() {
   # expose app publicly
   now=$(date "+%M%S")
   timestamp=$(date +"%r")
-  lbname="k8s-$lab-$release-$now-frontend"
+  lbname="k8s-$lab-$release-frontend-$now"
   printf "%s\n" "  + kubernetes ingress and public load balancer (~2m from $timestamp)"
   kubectl -n $ns create ingress $release-frontend \
     --class='alb' \

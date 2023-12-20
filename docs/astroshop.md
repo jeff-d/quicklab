@@ -104,7 +104,7 @@ In this step, we will deploy the application to the QuickLab cluster and expose 
     --rule="/*=$release-frontendproxy:8080" \
     --annotation alb.ingress.kubernetes.io/scheme=internet-facing \
     --annotation alb.ingress.kubernetes.io/target-type=ip \
-    --annotation alb.ingress.kubernetes.io/load-balancer-name=k8s-$lab-$release-$now-frontend
+    --annotation alb.ingress.kubernetes.io/load-balancer-name=k8s-$lab-$release-frontend-$now
     ```
 
 - verify load balancer is `active`
