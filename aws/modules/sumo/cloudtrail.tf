@@ -250,7 +250,7 @@ data "aws_iam_policy_document" "s3_sns" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["arn:${data.aws_partition.current.partition}:s3:::${var.prefix}-${var.uid}-cloudtrail-${data.aws_region.current.name}-*"]
+      values   = ["arn:${data.aws_partition.current.partition}:s3:::${var.prefix}-${var.uid}-ct-${data.aws_region.current.name}-*"]
     }
 
     condition {
