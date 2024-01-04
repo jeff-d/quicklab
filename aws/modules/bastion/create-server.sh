@@ -138,11 +138,12 @@ function get_opts() {
 
   # set defaults for unused options
   if [ -z "$count" ] ; then count=1 ; fi
- if [[ "$system" == "unspecified" ]]; then
-    printf "%s\n" "Specify a system type."
-    usage
-    exit
-  fi
+  
+  if [[ "$system" == "unspecified" ]]; then
+      printf "%s\n" "Specify a system type."
+      usage
+      exit
+    fi
 
   if [[ "$system" == "linux" ]]; then
     image_name=al2023-ami-kernel-default-x86_64
