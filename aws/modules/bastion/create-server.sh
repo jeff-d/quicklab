@@ -41,11 +41,12 @@ exit_trap () {
 # USAGE
 function usage(){
   banner
-  printf "%s\n"  "Usage: $scriptName -s [-c]"
+  printf "%s\n" "Usage: $scriptName [-s] [-c] [-u]"
   printf "%s\n"
-  printf "%s\n" "parameters:"
+  printf "%s\n" "Options:"
   printf "%s\n" "  -s system    system type (must be one of \"linux\" or \"windows\", default: \"linux\")"
   printf "%s\n" "  -c count     the number of Instances to create (default: 1)"
+  printf "%s\n" "  -u userdata  a file path to pass to the run-instances  \"--user-data file://\" option (e.g. my_script.txt)"
   printf "%s\n"
 }
 
@@ -122,12 +123,14 @@ function localhost_rdp () {
 function get_opts() {
   
   system="linux"
+  userdata=""
 
   local OPTIND
-  while getopts ":c:s:" option; do
+  while getopts ":c:s:u:" option; do
     case "$option" in
       c  ) count=$OPTARG;;
       s  ) system=$OPTARG;; # must be one of "linux", "windows"
+      u  ) userdata=$OPTARG;;
       \? ) printf "%s\n" "Unknown option: -$OPTARG" >&2; usage; exit 1;;
       :  ) printf "%s\n" "Missing option argument for -$OPTARG" >&2; usage; exit 1;;
       *  ) printf "%s\n" "Unimplemented option: -$OPTARG" >&2; usage; exit 1;;
@@ -217,17 +220,6 @@ function create_instance(){
     timestamp=$(date "+%Y%m%d-%H%M%S")
     subnet_id=$(shuffle "$priv_subnet_a" "$priv_subnet_b")
 
-    # create and use new keypair for each instance
-    # create_keypair
-    # keyname=$(
-    #   aws ec2 describe-key-pairs \
-    #     --profile $profile \
-    #     --region $region \
-    #     --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=$prefix-$lab_id-$system-$rand" "Name=tag:CreatedWith,Values=$scriptname" \
-    #     --query 'KeyPairs[*].{KeyName:KeyName}' \
-    #     --output text
-    # )
-
     # use QuickLab VPC keypair for all instances
     keyname=$(
       aws ec2 describe-key-pairs \
@@ -238,20 +230,44 @@ function create_instance(){
         --output text
     )
 
-    instance_id=$(
-      aws ec2 run-instances \
-      --profile $profile \
-      --region $region \
-      --image-id $image_id \
-      --instance-type $type \
-      --key-name $keyname \
-      --count 1 \
-      --subnet-id $subnet_id \
-      --security-group-ids $sgid \
-      --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$prefix-$lab_id-$system-$rand}, {Key=LabId,Value=$lab_id}, {Key=CreatedWith,Value=$scriptName}, {Key=CreatedAt,Value=$timestamp}]" \
-      --query 'Instances[*].{InstanceId:InstanceId}' \
-      --output text
-    )
+    if [ -z "$userdata" ] ; then 
+    
+      instance_id=$(
+        aws ec2 run-instances \
+        --profile $profile \
+        --region $region \
+        --image-id $image_id \
+        --instance-type $type \
+        --key-name $keyname \
+        --count 1 \
+        --subnet-id $subnet_id \
+        --security-group-ids $sgid \
+        --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$prefix-$lab_id-$system-$rand}, {Key=LabId,Value=$lab_id}, {Key=CreatedWith,Value=$scriptName}, {Key=CreatedAt,Value=$timestamp}]" \
+        --query 'Instances[*].{InstanceId:InstanceId}' \
+        --output text
+      )
+
+    else
+
+      instance_id=$(
+        aws ec2 run-instances \
+        --profile $profile \
+        --region $region \
+        --image-id $image_id \
+        --instance-type $type \
+        --key-name $keyname \
+        --count 1 \
+        --subnet-id $subnet_id \
+        --security-group-ids $sgid \
+        --user-data file://$userdata \
+        --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$prefix-$lab_id-$system-$rand}, {Key=LabId,Value=$lab_id}, {Key=CreatedWith,Value=$scriptName}, {Key=CreatedAt,Value=$timestamp}]" \
+        --query 'Instances[*].{InstanceId:InstanceId}' \
+        --output text
+      )
+
+    fi
+
+    
 
     instance_name=$(
       aws ec2 describe-instances \
