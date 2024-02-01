@@ -28,6 +28,7 @@ vpc_name=$(
     --query 'Vpcs[0].{Name:Tags[?Key==`Name`]|[0].Value}' \
     --output text
 )
+sgids=()
 
 
 ## FUNCTIONS
@@ -41,12 +42,15 @@ exit_trap () {
 # USAGE
 function usage(){
   banner
-  printf "%s\n" "Usage: $scriptName [-s] [-c] [-u]"
+  printf "%s\n" "Usage: $scriptName [-c] [-p] [-s] [-u] [-i] [-g]"
   printf "%s\n"
   printf "%s\n" "Options:"
-  printf "%s\n" "  -s system    system type (must be one of \"linux\" or \"windows\", default: \"linux\")"
-  printf "%s\n" "  -c count     the number of Instances to create (default: 1)"
-  printf "%s\n" "  -u userdata  a file path to pass to the run-instances  \"--user-data file://\" option (e.g. my_script.txt)"
+  printf "%s\n" "  -c count               the number of Instances to create (default: 1)"
+  printf "%s\n" "  -p placement           subnet type for the Instances (must be one of \"private\" or \"public\", default: \"private\")"
+  printf "%s\n" "  -s system              system type (must be one of \"linux\" or \"windows\", default: \"linux\")"
+  printf "%s\n" "  -u userdata            a file path to pass to the run-instances \"--user-data file://\" option (e.g. my_script.txt)"
+  printf "%s\n" "  -i instanceProfile     the name of an IAM instance profile to pass to the \"--iam-instance-profile\" option"
+  printf "%s\n" "  -g groupId             the ID of VPC Security Group to associate with created instances (e.g. sg-abcd1234)"
   printf "%s\n"
 }
 
@@ -122,15 +126,20 @@ function localhost_rdp () {
 # OPTIONS
 function get_opts() {
   
-  system="linux"
-  userdata=""
+  # system="linux"
+  # count=
+  # placement="private"
+  # userdata=""
 
   local OPTIND
-  while getopts ":c:s:u:" option; do
+  while getopts ":c:p:s:u:i:g:" option; do
     case "$option" in
-      c  ) count=$OPTARG;;
-      s  ) system=$OPTARG;; # must be one of "linux", "windows"
-      u  ) userdata=$OPTARG;;
+      c ) count=$OPTARG;;
+      p ) placement=$OPTARG;; # must be one of "private", "public"
+      s ) system=$OPTARG;; # must be one of "linux", "windows"
+      u ) userdata="file://$OPTARG";;
+      i ) instanceProfile=$OPTARG;;
+      g ) groupId=$OPTARG; sgids+=("$groupId");;
       \? ) printf "%s\n" "Unknown option: -$OPTARG" >&2; usage; exit 1;;
       :  ) printf "%s\n" "Missing option argument for -$OPTARG" >&2; usage; exit 1;;
       *  ) printf "%s\n" "Unimplemented option: -$OPTARG" >&2; usage; exit 1;;
@@ -140,25 +149,28 @@ function get_opts() {
   shift "$((OPTIND - 1))"
 
   # set defaults for unused options
-  if [ -z "$count" ] ; then count=1 ; fi
+  if [ -z "$system" ] ; then system="linux" ; fi
   
-  if [[ "$system" == "unspecified" ]]; then
-      printf "%s\n" "Specify a system type."
-      usage
-      exit
-    fi
+  if [ -z "$placement" ] ; then placement="private" ; fi
+
+  if [ -z "$userdata" ] ; then userdata="" ; fi
+
+  if [ -z "$instanceProfile" ] ; then instanceProfile="" ; fi
+
+  if [ -z "$count" ] ; then count=1 ; fi
 
   if [[ "$system" == "linux" ]]; then
     image_name=al2023-ami-kernel-default-x86_64
     image_id="resolve:ssm:/aws/service/ami-amazon-linux-latest/$image_name"
     type="t3.micro"
-    sgid=$(
-      aws ec2 describe-security-groups \
-        --profile $profile \
-        --region $region \
-        --filters Name=vpc-id,Values=$vpc_id Name=group-name,Values=bastion-remote-access-ssh \
-        --query "SecurityGroups[*].GroupId" \
-        --output text
+    sgids+=(
+        $(aws ec2 describe-security-groups \
+          --profile $profile \
+          --region $region \
+          --filters Name=vpc-id,Values=$vpc_id Name=group-name,Values=remote-access-ssh \
+          --query "SecurityGroups[*].GroupId" \
+          --output text
+        )
     )
     # image_name=$(aws ec2 describe-images --owners amazon --filters "Name=name,Values=al2023-ami-2023*-kernel-*-x86_64" --query 'reverse(sort_by(Images, &CreationDate))[0].Name' --output text)
 
@@ -168,18 +180,33 @@ function get_opts() {
     image_name=Windows_Server-2022-English-Full-Base
     image_id="resolve:ssm:/aws/service/ami-windows-latest/$image_name"
     type="t3.large"
-    sgid=$(
-      aws ec2 describe-security-groups \
+    sgids+=(
+      $(aws ec2 describe-security-groups \
         --profile $profile \
         --region $region \
-        --filters Name=vpc-id,Values=$vpc_id Name=group-name,Values=bastion-remote-access-rdp \
+        --filters Name=vpc-id,Values=$vpc_id Name=group-name,Values=remote-access-rdp \
         --query "SecurityGroups[*].GroupId" \
         --output text
+      )
     )
     # image_name=$(aws ec2 describe-images --owners amazon --filters "Name=name,Values=Windows_Server-2022-English-Full-Base*" --query 'reverse(sort_by(Images, &CreationDate))[0].Name' --output text)
   else
     usage
     exit 1
+  fi
+
+  if [[ "$placement" == "public" ]]; then
+
+    sgids+=(
+      $(aws ec2 describe-security-groups \
+        --profile $profile \
+        --region $region \
+        --filters Name=vpc-id,Values=$vpc_id Name=group-name,Values=public-webserver \
+        --query "SecurityGroups[*].GroupId" \
+        --output text
+      )
+    )
+
   fi
 }
 
@@ -194,31 +221,31 @@ function shuffle () {
 # CREATE INSTANCE
 function create_instance(){
   
-  priv_subnet_a=$(
+  subnet_a=$(
     aws ec2 describe-subnets \
       --profile $profile \
       --region $region \
-      --filters Name=vpc-id,Values=$vpc_id "Name=tag:Name,Values=*private*" "Name=availability-zone,Values=${region}a" \
+      --filters Name=vpc-id,Values=$vpc_id "Name=tag:Name,Values=*${placement}*" "Name=availability-zone,Values=${region}a" \
       --query 'Subnets[*].{SubnetId:SubnetId}' \
       --output text
   )
 
-  priv_subnet_b=$(
+  subnet_b=$(
     aws ec2 describe-subnets \
       --profile $profile \
       --region $region \
-      --filters Name=vpc-id,Values=$vpc_id "Name=tag:Name,Values=*private*" "Name=availability-zone,Values=${region}b" \
+      --filters Name=vpc-id,Values=$vpc_id "Name=tag:Name,Values=*${placement}*" "Name=availability-zone,Values=${region}b" \
       --query 'Subnets[*].{SubnetId:SubnetId}' \
       --output text
   )
 
-  printf "%s\n" "Creating $count new $type $system Instance(s) using $image_name"
+  printf "%s\n" "Creating $count new $placement $type $system Instance(s) using $image_name"
   printf "%s\n"
   printf "%s\n" "Instances:"
   for (( i=1; i<=$count; i++ )); do
     rand=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | head -c 6) || (ec=$? ; if [ "$ec" -eq 141 ]; then exit 0; else exit "$ec"; fi)
     timestamp=$(date "+%Y%m%d-%H%M%S")
-    subnet_id=$(shuffle "$priv_subnet_a" "$priv_subnet_b")
+    subnet_id=$(shuffle "$subnet_a" "$subnet_b")
 
     # use QuickLab VPC keypair for all instances
     keyname=$(
@@ -230,44 +257,23 @@ function create_instance(){
         --output text
     )
 
-    if [ -z "$userdata" ] ; then 
-    
-      instance_id=$(
-        aws ec2 run-instances \
-        --profile $profile \
-        --region $region \
-        --image-id $image_id \
-        --instance-type $type \
-        --key-name $keyname \
-        --count 1 \
-        --subnet-id $subnet_id \
-        --security-group-ids $sgid \
-        --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$prefix-$lab_id-$system-$rand}, {Key=LabId,Value=$lab_id}, {Key=CreatedWith,Value=$scriptName}, {Key=CreatedAt,Value=$timestamp}]" \
-        --query 'Instances[*].{InstanceId:InstanceId}' \
-        --output text
-      )
+    instance_id=$(
+      aws ec2 run-instances \
+      --profile $profile \
+      --region $region \
+      --image-id $image_id \
+      --instance-type $type \
+      --key-name $keyname \
+      --count 1 \
+      --subnet-id $subnet_id \
+      --security-group-ids ${sgids[@]} \
+      --iam-instance-profile Name=$instanceProfile \
+      --user-data $userdata \
+      --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$prefix-$lab_id-$system-$rand}, {Key=LabId,Value=$lab_id}, {Key=Placement,Value=$placement}, {Key=CreatedWith,Value=$scriptName}, {Key=CreatedAt,Value=$timestamp}]" \
+      --query 'Instances[*].{InstanceId:InstanceId}' \
+      --output text
+    )
 
-    else
-
-      instance_id=$(
-        aws ec2 run-instances \
-        --profile $profile \
-        --region $region \
-        --image-id $image_id \
-        --instance-type $type \
-        --key-name $keyname \
-        --count 1 \
-        --subnet-id $subnet_id \
-        --security-group-ids $sgid \
-        --user-data file://$userdata \
-        --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$prefix-$lab_id-$system-$rand}, {Key=LabId,Value=$lab_id}, {Key=CreatedWith,Value=$scriptName}, {Key=CreatedAt,Value=$timestamp}]" \
-        --query 'Instances[*].{InstanceId:InstanceId}' \
-        --output text
-      )
-
-    fi
-
-    
 
     instance_name=$(
       aws ec2 describe-instances \
@@ -349,38 +355,72 @@ function create_keypair(){
 function summary() {
 
   if [[ "$system" == "linux" ]]; then
-    aws ec2 describe-instances \
-      --profile $profile \
-      --region $region \
-      --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*linux*" "Name=tag:CreatedWith,Values=$scriptName" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
-      --query 'Reservations[*].Instances[*].{InstanceId:InstanceId, Name:Tags[?Key==`Name`]|[0].Value, PrivateDnsName:PrivateDnsName, State:State.Name}' \
-      --output table
-
-    instance_id=$(
+    if [[ "$placement" == "private" ]]; then
       aws ec2 describe-instances \
         --profile $profile \
         --region $region \
-        --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*linux*" "Name=tag:CreatedWith,Values=$scriptName" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
-        --query 'Reservations[0].Instances[0].{InstanceId:InstanceId}' \
-        --output text
-    )
-    
-    instance_priv_dns=$(
+        --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*linux*" "Name=tag:CreatedWith,Values=$scriptName" "Name=tag:Placement,Values=$placement" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
+        --query 'Reservations[*].Instances[*].{InstanceId:InstanceId, Name:Tags[?Key==`Name`]|[0].Value, Placement:Tags[?Key==`Placement`]|[0].Value, PrivateDnsName:PrivateDnsName, State:State.Name}' \
+        --output table
+
+      instance_id=$(
+        aws ec2 describe-instances \
+          --profile $profile \
+          --region $region \
+          --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*linux*" "Name=tag:CreatedWith,Values=$scriptName" "Name=tag:Placement,Values=$placement" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
+          --query 'Reservations[0].Instances[0].{InstanceId:InstanceId}' \
+          --output text
+      )
+      
+      instance_priv_dns=$(
+        aws ec2 describe-instances \
+          --profile $profile \
+          --region $region \
+          --instance-id $instance_id \
+          --query 'Reservations[0].Instances[0].{PrivateDnsName:PrivateDnsName}' \
+          --output text
+      )
+
+      printf "%s\n"
+      printf "%s\n" "To connect (linux):"
+      printf "%s\n" "  1. note the PrivateDnsName of your server"
+      printf "%s\n" "     example command: \"PrivateDnsName=$instance_priv_dns\" "
+      printf "%s\n" "  2. connect to the server using the included ssh config file"
+      printf "%s\n" "     example command: \"ssh -F $(terraform output -raw bastion_proxyjump_config) \$PrivateDnsName\" "
+    elif [[ "$placement" == "public" ]]; then
       aws ec2 describe-instances \
         --profile $profile \
         --region $region \
-        --instance-id $instance_id \
-        --query 'Reservations[0].Instances[0].{PrivateDnsName:PrivateDnsName}' \
-        --output text
-    )
+        --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*linux*" "Name=tag:CreatedWith,Values=$scriptName" "Name=tag:Placement,Values=$placement" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
+        --query 'Reservations[*].Instances[*].{InstanceId:InstanceId, Name:Tags[?Key==`Name`]|[0].Value, Placement:Tags[?Key==`Placement`]|[0].Value, PublicDnsName:PublicDnsName, State:State.Name}' \
+        --output table
 
-    printf "%s\n"
-    printf "%s\n" "To connect (linux):"
-    printf "%s\n" "  1. note the PrivateDnsName of your server"
-    printf "%s\n" "     example command: \"PrivateDnsName=$instance_priv_dns\" "
-    printf "%s\n" "  2. connect to the server using the included ssh config file"
-    printf "%s\n" "     example command: \"ssh -F $(terraform output -raw bastion_proxyjump_config) \$PrivateDnsName\" "
+      instance_id=$(
+        aws ec2 describe-instances \
+          --profile $profile \
+          --region $region \
+          --filters "Name=tag:LabId,Values=$lab_id" "Name=tag:Name,Values=*linux*" "Name=tag:CreatedWith,Values=$scriptName" "Name=tag:Placement,Values=$placement" "Name=instance-state-name,Values=pending,running,shutting-down,stopping,stopped" \
+          --query 'Reservations[0].Instances[0].{InstanceId:InstanceId}' \
+          --output text
+      )
+      
+      instance_public_dns=$(
+        aws ec2 describe-instances \
+          --profile $profile \
+          --region $region \
+          --instance-id $instance_id \
+          --query 'Reservations[0].Instances[0].{PublicDnsName:PublicDnsName}' \
+          --output text
+      )
 
+      printf "%s\n"
+      printf "%s\n" "To connect (linux):"
+      printf "%s\n" "  1. note the PublicDnsName of your server"
+      printf "%s\n" "     example command: \"PublicDnsName=$instance_public_dns\" "
+      printf "%s\n" "  2. connect to the server using the included ssh config file"
+      printf "%s\n" "     example command: \"ssh -i $(terraform output -raw network_keyfile) ec2-user@\$PublicDnsName\" "
+
+    fi 
   elif [[ "$system" == "windows" ]]; then
     aws ec2 describe-instances \
       --profile $profile \
@@ -421,7 +461,7 @@ function summary() {
     printf "%s\n" "     example command: \"open $PWD/localhost.rdp\""
     printf "%s\n" "  5. log in using the server's credentials, e.g username: \"Administrator\", password: <decrypted password>"
   fi
-
+:
 }
 
 # BANNER

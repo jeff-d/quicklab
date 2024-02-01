@@ -222,11 +222,11 @@ resource "aws_route_table_association" "private_b" {
   route_table_id = aws_route_table.private.id
 }
 
-
 # Security Groups
-resource "aws_security_group" "networkmonitoring" {
-  name        = "vpc-network-monitoring"
-  description = "enables members to analyze packets"
+# Security Group: Network Monitoring
+resource "aws_security_group" "network_monitoring" {
+  name        = "network-monitoring"
+  description = "enables members to analyze packets from VPC traffic mirroring"
   vpc_id      = aws_vpc.this.id
   tags = {
     Component = local.module
@@ -241,12 +241,12 @@ resource "aws_security_group_rule" "allow_vpctm_in" {
   to_port           = 4789
   protocol          = "udp"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.networkmonitoring.id
+  security_group_id = aws_security_group.network_monitoring.id
 }
 
 # Security Group: Remote Access SSH
 resource "aws_security_group" "remoteaccess_ssh" {
-  name        = "bastion-remote-access-ssh"
+  name        = "remote-access-ssh"
   description = "enable members to accept SSH connections"
   vpc_id      = aws_vpc.this.id
   tags = {
@@ -267,7 +267,7 @@ resource "aws_security_group_rule" "allow_ssh_in" {
 
 # Security Group: Remote Access RDP
 resource "aws_security_group" "remoteaccess_rdp" {
-  name        = "bastion-remote-access-rdp"
+  name        = "remote-access-rdp"
   description = "enable members to accept RDP (TCP) connections"
   vpc_id      = aws_vpc.this.id
   tags = {
@@ -295,6 +295,36 @@ resource "aws_security_group_rule" "allow_rdp_in_udp" {
   security_group_id = aws_security_group.remoteaccess_rdp.id
 }
 
+# Security Group: Public Webserver
+resource "aws_security_group" "public_webserver" {
+  name        = "public-webserver"
+  description = "enable members to accept HTTP and HTTPS"
+  vpc_id      = aws_vpc.this.id
+  tags = {
+    Component = local.module
+    Name      = "${aws_vpc.this.tags_all.Name}-sg-public-webserver"
+    CreatedBy = var.creator
+  }
+}
+resource "aws_security_group_rule" "allow_http_in" {
+  type              = "ingress"
+  description       = "allow HTTP in from anywhere (ipv4)"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.public_webserver.id
+}
+resource "aws_security_group_rule" "allow_https_in" {
+  type              = "ingress"
+  description       = "allow HTTPS in from anywhere (ipv4)"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.public_webserver.id
+}
+
 #TODO: update security group ingress rule to new-style terraform resource, once they support a list of prefix_list_ids
 /*
 resource "aws_vpc_security_group_ingress_rule" "allow_rdp_in_tcp" {
@@ -320,9 +350,10 @@ resource "aws_vpc_security_group_ingress_rule" "allow_rdp_in_udp" {
 # Security Group Rule: Allow All Out
 resource "aws_vpc_security_group_egress_rule" "allow_all_out" {
   for_each = {
-    "remoteaccess_ssh"  = "${aws_security_group.remoteaccess_ssh.id}"
-    "remoteaccess_rdp"  = "${aws_security_group.remoteaccess_rdp.id}"
-    "networkmonitoring" = "${aws_security_group.networkmonitoring.id}"
+    "remoteaccess_ssh"   = "${aws_security_group.remoteaccess_ssh.id}"
+    "remoteaccess_rdp"   = "${aws_security_group.remoteaccess_rdp.id}"
+    "network_monitoring" = "${aws_security_group.network_monitoring.id}"
+    "public_webserver"   = "${aws_security_group.public_webserver.id}"
   }
   description = "Allow all traffic out (IPv4)" # recreates default AWS SG outbound rule that terraform implicitly deletes
   # from_port   = 0 # not used when ip_protocol is -1
@@ -332,7 +363,6 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_out" {
   # ipv6_cidr_blocks  = ["::/0"]
   security_group_id = each.value
 }
-
 
 # VPC Flow Logs
 resource "aws_flow_log" "this" {
