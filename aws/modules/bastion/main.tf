@@ -121,7 +121,7 @@ data "cloudinit_config" "sumo" {
 
 # Security Group: Bastion
 resource "aws_security_group" "bastion" {
-  name        = "${prefix}-bastion-default"
+  name        = "${var.prefix}-bastion-default"
   description = "default security group for QuickLab bastion"
   vpc_id      = var.vpc.id
 
