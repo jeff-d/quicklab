@@ -20,11 +20,9 @@ scriptName="$(basename ${0})"
 profile=$(terraform output -raw aws_profile)
 region=$(terraform output -raw aws_region)
 lab=$(terraform output -raw _lab_id)
-release=otel-demo
+release=astroshop
 ns=apps
 chart="modules/cluster/sumo-opentelemetry-demo/"
-# chart="open-telemetry/opentelemetry-demo"
-values="modules/cluster/otel-demo-values.yaml"
 
 ## FUNCTIONS
 function exit_trap () {
@@ -171,7 +169,7 @@ function install() {
   # create helm release
   timestamp=$(date +"%r")
   printf "%s\n" "  + helm release (~5m from $timestamp)"
-  helm upgrade -i $release $chart --atomic --namespace $ns --create-namespace --values $values > /dev/null | awk '{ print "  " $0; }'
+  helm upgrade -i $release $chart --atomic --namespace $ns --create-namespace > /dev/null | awk '{ print "  " $0; }'
   timestamp=$(date +"%r")
   printf "%s\n" "    ($timestamp) release $release created successfully in namespace $ns from chart $chart"
 
