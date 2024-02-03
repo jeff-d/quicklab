@@ -26,3 +26,9 @@ output "ssh_config" {
   description = "the SSH config file that references the the QuickLab Bastion"
   value       = local_file.ssh_config.filename
 }
+
+# used in "cluster" module
+output "bastion_sg" {
+  description = "Bastion default Security Group"
+  value       = aws_security_group.bastion.id
+}

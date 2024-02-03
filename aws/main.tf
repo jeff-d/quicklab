@@ -126,7 +126,7 @@ module "cluster" {
   private_subnet_a            = module.network["${local.uid}"].private_subnet_a
   private_subnet_b            = module.network["${local.uid}"].private_subnet_b
   pl_remoteaccess             = module.network["${local.uid}"].pl_remoteaccess
-  network_sg_remote_ssh       = length(module.network) > 0 ? module.network["${local.uid}"].sg_remote_ssh : null
+  bastion_sg                  = length(module.bastion) > 0 ? module.bastion["${local.uid}"].bastion_sg : null
   sumo_accessid               = var.sumo_accessid
   sumo_accesskey              = var.sumo_accesskey
   sumo_cluster_rum_traces_url = length(module.sumo) > 0 ? module.sumo["${local.uid}"].rum_traces_url : "n/a"

@@ -39,7 +39,7 @@ output "public_subnet_b" {
 }
 
 
-# Used in "bastion" module
+# used in "bastion" module
 output "public_subnet_a" {
   description = "ID of public subnet a"
   value       = aws_subnet.public_a.id
@@ -58,7 +58,7 @@ output "sg_remoteaccess_rdp_id" {
 }
 
 
-# Used in "cluster" module
+# used in "cluster" module
 output "private_subnet_a" {
   description = "private subnet a ID"
   value       = aws_subnet.private_a.id
@@ -67,13 +67,9 @@ output "private_subnet_b" {
   description = "private subnet b ID"
   value       = aws_subnet.private_b.id
 }
-output "sg_remote_ssh" {
-  description = ""
-  value       = aws_security_group.remoteaccess_ssh.id
-}
 
 
-# Used in "sumo" module
+# used in "sumo" module
 output "cwlog_group_flowlogs" {
   description = "the ID of the CloudWatch Log Group for QuickLab VPC Flow Logs"
   value       = aws_cloudwatch_log_group.flowlogs.name

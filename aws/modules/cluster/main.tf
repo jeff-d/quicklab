@@ -44,7 +44,6 @@ resource "aws_eks_cluster" "this" {
   }
 }
 
-
 # EKS Logs
 resource "aws_cloudwatch_log_group" "eks" {
   name              = "/aws/eks/${var.prefix}-${var.uid}-cluster/cluster"
@@ -57,14 +56,11 @@ resource "aws_cloudwatch_log_group" "eks" {
   }
 }
 
-
 # Kubeconfig
-
 resource "local_file" "dotkube" {
   content  = "this file confirms the exsistence of the path ~/.kube"
   filename = pathexpand("~/.kube/${var.prefix}-pathcheck.txt")
 }
-
 resource "null_resource" "kubeconfig" {
 
   provisioner "local-exec" {
@@ -84,7 +80,6 @@ resource "null_resource" "kubeconfig" {
     aws_eks_cluster.this
   ]
 }
-
 
 # EKS Node Group
 resource "aws_eks_node_group" "this" {
@@ -111,13 +106,6 @@ resource "aws_eks_node_group" "this" {
     max_unavailable_percentage = 100
   }
 
-  /*
-  # no remote_access block if using aws_launch_template
-  remote_access {
-    ec2_ssh_key               = var.ssh_key.key_name
-    source_security_group_ids = var.network_sg_remote_ssh != null ? [var.network_sg_remote_ssh] : [aws_security_group.node.id] # ensures list always has an entry to avoid default behavior of opening node SG up to 0.0.0.0/0 when list is empty
-  }
-  */
 
   lifecycle {
     ignore_changes = [
@@ -237,7 +225,6 @@ resource "aws_security_group_rule" "allow_remoteaccess_https_in" {
   type              = "ingress"
 }
 
-
 # Security Group: Node
 resource "aws_security_group" "node" {
   name        = "eks-nodes"
@@ -278,7 +265,15 @@ resource "aws_security_group_rule" "allow_all_node" {
   to_port                  = 65535
   type                     = "ingress"
 }
-
+resource "aws_security_group_rule" "allow_bastion_ssh_in" {
+  security_group_id        = aws_security_group.node.id
+  description              = "Allow ssh from QuickLab Bastion"
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = 22
+  to_port                  = 22
+  source_security_group_id = var.bastion_sg != null ? var.bastion_sg : aws_security_group.node.id
+}
 
 # Security Group Rules
 resource "aws_security_group_rule" "allow_all_out" {
@@ -295,7 +290,6 @@ resource "aws_security_group_rule" "allow_all_out" {
   # ipv6_cidr_blocks  = ["::/0"]
   security_group_id = each.value
 }
-
 
 # IAM Role: Cluster
 resource "aws_iam_role" "cluster" {
@@ -327,7 +321,6 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
   policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonEKSVPCResourceController"
   role       = aws_iam_role.cluster.name
 }
-
 
 # IAM Role: Node
 resource "aws_iam_role" "node" {

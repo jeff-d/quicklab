@@ -15,7 +15,7 @@ variable "ssh_key" {}
 variable "private_subnet_a" {}
 variable "private_subnet_b" {}
 variable "pl_remoteaccess" {}
-variable "network_sg_remote_ssh" {}
+variable "bastion_sg" {}
 variable "sumo_accessid" {}
 variable "sumo_accesskey" {}
 variable "sumo_cluster_rum_traces_url" {
