@@ -9,6 +9,10 @@ output "_lab_id" {
   description = "a unique Lab Id generated when creating an empty QuickLab."
   value       = try(local.uid, null)
 }
+output "_project" {
+  description = "a project label used in resource tagging."
+  value       = try(var.project != "-" ? var.project : null, null) # only display the output for user-supplied values
+}
 output "aws_resource_group" {
   description = "the Group containing all AWS resources associated wth this Lab Id."
   value       = try(aws_resourcegroups_group.this.name, null)

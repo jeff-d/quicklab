@@ -214,6 +214,7 @@ function install() {
 
 }
 
+
 function banner() {
 cat << "EOF"
 
@@ -223,14 +224,18 @@ cat << "EOF"
   / /_/ // /_/ /_  / / /__ _  ,<  _  /___/ /_/ /_  /_/ /
   \___\_\\__,_/ /_/  \___/ /_/|_| /_____/\__,_/ /_.___/
 
+                                            quicklab.io
+
 EOF
 
-printf "%s\n" "$scriptName"
-printf "%s\n"
-printf "%s\n" "\"AstronomyShop\" is the OpenTelemetry Demo Application"
-printf "%s\n" "https://opentelemetry.io/docs/demo/"
-printf "%s\n"
-}
+  printf "%s\n" "$scriptName"
+  printf "%s\n"
+  printf "%s\n" "\"AstronomyShop\" is the OpenTelemetry Demo Application"
+  printf "%s\n" "https://opentelemetry.io/docs/demo/"
+  printf "%s\n"
+} 
+
+
 
 ## SCRIPT BODY
 get_opts "$@"

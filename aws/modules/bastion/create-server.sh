@@ -10,7 +10,7 @@
 set -e
 # set -u
 set -o pipefail
-# trap exit_trap EXIT
+trap exit_trap EXIT
 
 ## CONSTANTS
 scriptName="$(basename ${0})"
@@ -64,8 +64,8 @@ function localhost_rdp () {
     printf "%s\n" "smart sizing:i:1" >> localhost.rdp
     printf "%s\n" "armpath:s:" >> localhost.rdp
     printf "%s\n" "enablerdsaadauth:i:0" >> localhost.rdp
-    printf "%s\n" "targetisaadjoined:i:0" >> localhost.rdp >> localhost.rdp
-    printf "%s\n" "hubdiscoverygeourl:s:" >> localhost.rdp >> localhost.rdp
+    printf "%s\n" "targetisaadjoined:i:0" >> localhost.rdp
+    printf "%s\n" "hubdiscoverygeourl:s:" >> localhost.rdp
     printf "%s\n" "redirected video capture encoding quality:i:0" >> localhost.rdp
     printf "%s\n" "camerastoredirect:s:" >> localhost.rdp
     printf "%s\n" "gatewaybrokeringtype:i:0" >> localhost.rdp
@@ -153,8 +153,6 @@ function get_opts() {
   
   if [ -z "$placement" ] ; then placement="private" ; fi
 
-  if [ -z "$userdata" ] ; then userdata="" ; fi
-
   if [ -z "$instanceProfile" ] ; then instanceProfile="" ; fi
 
   if [ -z "$count" ] ; then count=1 ; fi
@@ -172,6 +170,8 @@ function get_opts() {
           --output text
         )
     )
+    # user data string can't be empty
+    if [ -z "$userdata" ] ; then userdata='' ; fi
     # image_name=$(aws ec2 describe-images --owners amazon --filters "Name=name,Values=al2023-ami-2023*-kernel-*-x86_64" --query 'reverse(sort_by(Images, &CreationDate))[0].Name' --output text)
 
 
@@ -189,6 +189,8 @@ function get_opts() {
         --output text
       )
     )
+    # user data string can't be empty
+    if [ -z "$userdata" ] ; then userdata='<powershell>  $file = $env:SystemDrive + "\delete-me-" + (Get-Date).ToString("MM-dd-yy-hh-mm");  New-Item $file -ItemType file</powershell><detach>true</detach>' ; fi
     # image_name=$(aws ec2 describe-images --owners amazon --filters "Name=name,Values=Windows_Server-2022-English-Full-Base*" --query 'reverse(sort_by(Images, &CreationDate))[0].Name' --output text)
   else
     usage
@@ -221,6 +223,7 @@ function shuffle () {
 # CREATE INSTANCE
 function create_instance(){
   
+  # printf "%s\n" "DEBUG userdata = $userdata"
   subnet_a=$(
     aws ec2 describe-subnets \
       --profile $profile \
@@ -268,12 +271,11 @@ function create_instance(){
       --subnet-id $subnet_id \
       --security-group-ids ${sgids[@]} \
       --iam-instance-profile Name=$instanceProfile \
-      --user-data $userdata \
+      --user-data "$userdata" \
       --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$prefix-$lab_id-$system-$rand}, {Key=LabId,Value=$lab_id}, {Key=Placement,Value=$placement}, {Key=CreatedWith,Value=$scriptName}, {Key=CreatedAt,Value=$timestamp}]" \
       --query 'Instances[*].{InstanceId:InstanceId}' \
       --output text
     )
-
 
     instance_name=$(
       aws ec2 describe-instances \
@@ -454,7 +456,7 @@ function summary() {
     printf "%s\n" "  1. note server's Instance Id and PrivateDnsName"
     printf "%s\n" "     example command: \"InstanceId=$instance_id && PrivateDnsName=$instance_priv_dns\" "
     printf "%s\n" "  2. decrypt server's password"
-    printf "%s\n" "     example command: \"aws ec2 get-password-data --instance-id \$InstanceId --priv-launch-key $(terraform output -raw network_keyfile) --query {AdminPassword:PasswordData} --output text\" "
+    printf "%s\n" "     example command: \"aws ec2 get-password-data --profile $profile --region $region --instance-id \$InstanceId --priv-launch-key $(terraform output -raw network_keyfile) --query {AdminPassword:PasswordData} --output text\" "
     printf "%s\n" "  3. tunnel RDP traffic through an SSH connection to the QuickLab Bastion"
     printf "%s\n" "     example command: \"$bastion_connect -L 3389:\$PrivateDnsName:3389\" "
     printf "%s\n" "  4. use an RDP client to initiatiate an RDP connection to \"localhost\" using the generated RDP connection file"
@@ -474,11 +476,13 @@ cat << "EOF"
   / /_/ // /_/ /_  / / /__ _  ,<  _  /___/ /_/ /_  /_/ /
   \___\_\\__,_/ /_/  \___/ /_/|_| /_____/\__,_/ /_.___/
 
+                                            quicklab.io
+  
 EOF
 
-printf "%s\n" "$scriptName"
-printf "%s\n"
-}
+  printf "%s\n" "$scriptName"
+  printf "%s\n"
+} 
 
 
 ## SCRIPT BODY

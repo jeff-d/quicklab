@@ -182,11 +182,13 @@ cat << "EOF"
   / /_/ // /_/ /_  / / /__ _  ,<  _  /___/ /_/ /_  /_/ /
   \___\_\\__,_/ /_/  \___/ /_/|_| /_____/\__,_/ /_.___/
 
+                                            quicklab.io
+  
 EOF
 
   printf "%s\n" "$scriptName"
   printf "%s\n"
-}
+} 
 
 ## SCRIPT BODY
 banner
