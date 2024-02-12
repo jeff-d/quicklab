@@ -256,7 +256,7 @@ resource "aws_lambda_function" "dlq_eks" {
   environment {
     variables = {
       SUMO_ENDPOINT     = sumologic_http_source.eks["cluster"].url
-      TASK_QUEUE_URL    = aws_sqs_queue.dlq_eks["cluster"].name
+      TASK_QUEUE_URL    = join("", ["https://sqs.", "${data.aws_region.current.name}", ".amazonaws.com/", "${data.aws_caller_identity.current.account_id}", "/", aws_sqs_queue.dlq_eks["cluster"].name])
       NUM_OF_WORKERS    = 4
       LOG_FORMAT        = "VPC-JSON"
       INCLUDE_LOG_INFO  = true

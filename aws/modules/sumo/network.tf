@@ -275,7 +275,7 @@ resource "aws_lambda_function" "dlq_flowlogs" {
   environment {
     variables = {
       SUMO_ENDPOINT               = sumologic_http_source.flowlogs["network"].url
-      TASK_QUEUE_URL              = aws_sqs_queue.dlq_flowlogs["network"].name
+      TASK_QUEUE_URL              = join("", ["https://sqs.", "${data.aws_region.current.name}", ".amazonaws.com/", "${data.aws_caller_identity.current.account_id}", "/", aws_sqs_queue.dlq_flowlogs["network"].name])
       NUM_OF_WORKERS              = 4
       LOG_FORMAT                  = "VPC-JSON"
       INCLUDE_LOG_INFO            = true
