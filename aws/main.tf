@@ -36,8 +36,13 @@ provider "sumologic" {
 }
 
 
-resource "random_id" "quicklab" {
-  byte_length = 3
+resource "random_string" "quicklab" {
+  length  = 4
+  lower   = true
+  upper   = false
+  numeric = true
+  special = false
+
 }
 resource "aws_resourcegroups_group" "this" {
   name        = "${var.prefix}-${local.uid}-resources"
@@ -68,7 +73,7 @@ resource "aws_resourcegroups_group" "this" {
 
 module "network" {
 
-  depends_on = [random_id.quicklab]
+  depends_on = [random_string.quicklab]
 
   for_each = var.create_network ? toset(["${local.uid}"]) : toset([])
   source   = "./modules/network"
@@ -82,7 +87,7 @@ module "network" {
 }
 module "bastion" {
 
-  depends_on = [random_id.quicklab, module.network]
+  depends_on = [random_string.quicklab, module.network]
 
   for_each = var.create_network && var.create_bastion ? toset(["${local.uid}"]) : toset([])
   source   = "./modules/bastion"
@@ -105,7 +110,7 @@ module "bastion" {
 }
 module "cluster" {
 
-  depends_on = [random_id.quicklab, module.network]
+  depends_on = [random_string.quicklab, module.network]
 
   for_each = var.create_network && var.create_cluster ? toset(["${local.uid}"]) : toset([])
   source   = "./modules/cluster"
@@ -128,7 +133,7 @@ module "cluster" {
 }
 module "sumo" {
 
-  depends_on = [random_id.quicklab]
+  depends_on = [random_string.quicklab]
 
   for_each = var.monitoring == "sumo" ? toset(["${local.uid}"]) : toset([])
   source   = "./modules/sumo"
