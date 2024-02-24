@@ -25,25 +25,37 @@ locals {
   addons = [
     {
       name    = "aws-ebs-csi-driver"
-      version = "v1.18.0-eksbuild.1"
+      version = "v1.28.0-eksbuild.1"
     }
     /*
     ,
     {
+      name = "snapshot-controller"
+      version = "v6.3.2-eksbuild.1"
+    }
+    {
       name    = "kube-proxy"
-      version = "v1.26.4-eksbuild.1"
+      version = "v1.29.1-eksbuild.2"
     }
     {
       name    = "coredns"
-      version = "v1.9.3-eksbuild.3"
+      version = "v1.11.1-eksbuild.6"
     },
     {
       name    = "vpc-cni"
-      version = "v1.12.6-eksbuild.1"
+      version = "v1.16.3-eksbuild.2"
     },
     {
+      name = "aws-mountpoint-s3-csi-driver"
+      version = "v1.3.1-eksbuild.1"
+    }
+    {
+      name = "eks-pod-identity-agent"
+      version = "v1.2.0-eksbuild.1"
+    }
+    {
       name    = "aws-guardduty-agent"
-      version = "v1.1.0-eksbuild.1"
+      version = "v1.4.1-eksbuild.2"
     }
     */
   ]

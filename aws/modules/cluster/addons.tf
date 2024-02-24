@@ -6,32 +6,11 @@
 
 
 # AWS Marketplace Addons
-resource "aws_iam_openid_connect_provider" "cluster" {
-  client_id_list  = ["sts.${data.aws_partition.current.dns_suffix}"]
-  thumbprint_list = data.tls_certificate.cluster.certificates[*].sha1_fingerprint
-  url             = data.tls_certificate.cluster.url
-
-  tags = {
-    Component = local.module
-    CreatedBy = var.creator
-    Name      = "${aws_eks_cluster.this.name}-eks-irsa"
-  }
-
-  #TODO: solve inconsistent final plan with merged tags
-  /*
-  tags = merge(
-    {
-      Name      = "${aws_eks_cluster.this.name}-eks-irsa"
-      createdby = var.creator
-    }
-  )
-  */
-}
+# https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html#workloads-add-ons-available-eks
 resource "aws_eks_addon" "_" {
   for_each                    = { for addon in local.addons : addon.name => addon }
   cluster_name                = aws_eks_cluster.this.name
   addon_name                  = each.value.name
-  addon_version               = each.value.version
   service_account_role_arn    = aws_iam_role.irsa.arn
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "PRESERVE"
@@ -46,53 +25,6 @@ resource "aws_eks_addon" "_" {
     aws_eks_node_group.this
   ]
 
-}
-resource "aws_iam_role" "irsa" {
-  assume_role_policy = data.aws_iam_policy_document.irsa_trust_policy.json
-  name               = "${var.prefix}-${var.uid}-${local.module}-irsa-role"
-
-  tags = {
-    Component                 = local.module
-    createdby                 = var.creator
-    "ServiceAccountName"      = "eks-irsa"
-    "ServiceAccountNameSpace" = "kube-system"
-  }
-
-  depends_on = []
-
-}
-data "aws_iam_policy_document" "irsa_trust_policy" {
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect  = "Allow"
-
-    condition {
-      test     = "StringLike"
-      variable = "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:sub"
-      values = [
-        "system:serviceaccount:kube-system:ebs-csi-controller-sa",
-        "system:serviceaccount:*:${var.prefix}-${var.uid}-aws-load-balancer-controller",
-        "system:serviceaccount:*:${var.prefix}-${var.uid}-eks-irsa",
-        "system:serviceaccount:default:default"
-      ]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:aud"
-      values   = ["sts.amazonaws.com"]
-    }
-
-    principals {
-      identifiers = [aws_iam_openid_connect_provider.cluster.arn]
-      type        = "Federated"
-    }
-  }
-}
-resource "aws_iam_role_policy_attachment" "addon" {
-  for_each   = { for k, v in local.policies : k => v }
-  policy_arn = each.value
-  role       = aws_iam_role.irsa.name
 }
 
 
@@ -177,4 +109,65 @@ resource "aws_s3_bucket" "lblogs" {
     Component = local.module
     CreatedBy = var.creator
   }
+}
+
+
+# IAM roles for service accounts
+resource "aws_iam_openid_connect_provider" "cluster" {
+  client_id_list  = ["sts.${data.aws_partition.current.dns_suffix}"]
+  thumbprint_list = data.tls_certificate.cluster.certificates[*].sha1_fingerprint
+  url             = data.tls_certificate.cluster.url
+
+  tags = {
+    Component = local.module
+    CreatedBy = var.creator
+    Name      = "${aws_eks_cluster.this.name}-eks-irsa"
+  }
+}
+resource "aws_iam_role" "irsa" {
+  assume_role_policy = data.aws_iam_policy_document.irsa_trust_policy.json
+  name               = "${var.prefix}-${var.uid}-${local.module}-irsa-role"
+
+  tags = {
+    Component                 = local.module
+    createdby                 = var.creator
+    "ServiceAccountName"      = "eks-irsa"
+    "ServiceAccountNameSpace" = "kube-system"
+  }
+
+  depends_on = []
+
+}
+data "aws_iam_policy_document" "irsa_trust_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringLike"
+      variable = "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:sub"
+      values = [
+        "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+        "system:serviceaccount:*:${var.prefix}-${var.uid}-aws-load-balancer-controller",
+        "system:serviceaccount:*:${var.prefix}-${var.uid}-eks-irsa",
+        "system:serviceaccount:default:default"
+      ]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.cluster.arn]
+      type        = "Federated"
+    }
+  }
+}
+resource "aws_iam_role_policy_attachment" "addon" {
+  for_each   = { for k, v in local.policies : k => v }
+  policy_arn = each.value
+  role       = aws_iam_role.irsa.name
 }
