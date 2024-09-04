@@ -136,6 +136,13 @@ resource "aws_launch_template" "this" {
   key_name               = var.ssh_key.key_name
   vpc_security_group_ids = [aws_security_group.node.id]
 
+  metadata_options {
+    http_tokens                 = "required" # disables IMDS v1
+    http_put_response_hop_limit = 2          # required for LBC
+    http_endpoint               = "enabled"  # required when specifying hop limit
+    instance_metadata_tags      = "enabled"
+  }
+
   monitoring {
     enabled = true
   }
