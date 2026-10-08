@@ -39,7 +39,7 @@
 ## Cluster
 
 - Included addons: [Amazon EBS CSI Driver](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html), [AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/)
-- Enable QuickLab kubeconfig using `eval $(terraform output -raw cluster_kubeconfig)`. This updates your $KUBECONFIG path list with the locaiton of the QuickLab cluster's kubeconfig file.
+- Enable QuickLab kubeconfig using `eval $(terraform output -raw cluster_kubeconfig)`. This updates your $KUBECONFIG path list with the location of the QuickLab cluster's kubeconfig file.
 
   _Notes:_
 

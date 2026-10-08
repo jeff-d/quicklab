@@ -6,7 +6,7 @@
 
 # About QuickLab
 
-QuickLab's design philiosophy aims to balance two competing goals:
+QuickLab's design philosophy aims to balance two competing goals:
 
 - minimalism, which promotes maintainability and cost-optimization
 - a "batteries-included" experience, which doesn't require the QuickLab user to understand the internals of its underlying technologies (e.g. terraform, AWS, Kubernetes, and Sumo Logic).
@@ -30,7 +30,7 @@ You should have received a copy of the GNU Affero General Public License along w
 
 - This terraform project incorporates much of the guidance and design principles found in [The AWS Integration & Automation Team's Best Practices for Terraform](https://aws-ia.github.io/standards-terraform/)
 
-- QuickLab uses local terraform state, which is appropritate for a single-user project that creates short-lived infrastructure resources (even though some [sensitive data](https://developer.hashicorp.com/terraform/language/v1.1.x/state/sensitive-data) like a tls_private_key and aws_iam_access_key are involved). If you would like to co-manage a QuickLab with your friends, consider using a terraform deployment pattern that implements proper remote state storage and locking (e.g. [AWS S3 with DyanmoDB](https://www.terraform.io/language/settings/backends/s3))
+- QuickLab uses local terraform state, which is appropriate for a single-user project that creates short-lived infrastructure resources (even though some [sensitive data](https://developer.hashicorp.com/terraform/language/v1.1.x/state/sensitive-data) like a tls_private_key and aws_iam_access_key are involved). If you would like to co-manage a QuickLab with your friends, consider using a terraform deployment pattern that implements proper remote state storage and locking (e.g. [AWS S3 with DynamoDB](https://www.terraform.io/language/settings/backends/s3))
 
 - To avoid spurious terraform state diffs, QuickLab generates it's unique LabId using terraform's random provider rather than the uuid string function for reasons explained in the [terraform docs](https://developer.hashicorp.com/terraform/language/functions/uuid).
 
@@ -38,27 +38,17 @@ You should have received a copy of the GNU Affero General Public License along w
 
 - QuickLab intentionally avoids using terraform to manage kubernetes resources and recommends QuickLab users manage kubernetes resources themselves, outside of terraform (e.g. with kubectl, helm, or kustomize) while letting terraform manage the state of EKS resources. For a good discussion of the issues here, See Nat Bennett's blog post ["Why you shouldn't use Terraform to manage Kubernetes workloads"](https://www.simplermachines.com/why-you-shouldnt-use-terraform-to-manage-kubernetes-deployments/).
 
-- Quicklab intentionally avoids using terraform to manage helm releases, for the resaons listed above, with the notable exception of installing the AWS Load Balancer Controller EKS addon using a terraform `null_resource` to call `helm upgrade -i`.
+- Quicklab intentionally avoids using terraform to manage helm releases, for the reasons listed above, with the notable exception of installing the AWS Load Balancer Controller EKS addon using a terraform `null_resource` to call `helm upgrade -i`.
 
 ## Roadmap
 
-Next Up:
-
-- AWS (cluster): ALB access logs
-- AWS (monitoring): Linux-Opentelemetry App
-- AWS (cluster): additional EKS addons
-- AWS (sumo): Cloud SIEM Enterprise support
-- AWS (network): zeek
+Planned and proposed work is tracked in [GitHub Issues](https://github.com/jeff-d/quicklab/issues).
 
 ## Changelog
 
-Recently Added or Updated:
-
-- AWS (bastion): added shell scripts to create and delete servers in QuickLab network's private subnets
-- AWS (cluster): added shell script to ease un/install of AstronomyShop app in QuickLab cluster
-- AWS (sumo): EKS Control Plane App installed when Cluster enabled
-- AWS (cluster): enabled EKS Control Plane Logs
-- AWS: add unique Lab ID to enable multiple QuickLab instances in the same AWS account
+- [CHANGELOG.md](../CHANGELOG.md) : every notable change, annotated with its apply impact (`no-op`, `in-place`, `replacement`, or `state migration`)
+- [Releases](https://github.com/jeff-d/quicklab/releases) : tagged versions and their release notes
+- [Versioning](versioning.md) : what MAJOR, MINOR, and PATCH mean for QuickLab, and how to upgrade between them
 
 ## Documentation
 

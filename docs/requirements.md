@@ -42,11 +42,10 @@ While the below are not needed, they may help you get started faster, or make so
 
 - [Homebrew](https://brew.sh/) : a package manager for Mac OS which can be used to install the tools used by QuickLab via `brew install`
 - [direnv](https://direnv.net/) (`brew install direnv`) : a shell extension for using directory-specific environment variables, which [can be used](https://developer.hashicorp.com/terraform/cli/config/environment-variables) to keep API keys out of terraform
-  graph#generating-images)
 - [jq](https://jqlang.github.io/jq/) (`brew install jq`) : lightweight cli json processor
 - [yq](https://kislyuk.github.io/yq/) (`brew install yq`) : cli tool for working with yaml
 - [Markdown Viewer](https://github.com/simov/markdown-viewer) : a browser extension for viewing markdown documents, with support for images and hyperlinks
-- [GraphViz](https://graphviz.org/) (`brew install graphviz`) : can be used when generating an image of the [terraform graph](https://developer.hashicorp.com/terraform/cli/commands/
+- [GraphViz](https://graphviz.org/) (`brew install graphviz`) : can be used when generating an image of the [terraform graph](https://developer.hashicorp.com/terraform/cli/commands/graph#generating-images)
 
 ---
 
