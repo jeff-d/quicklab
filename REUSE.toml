@@ -1,0 +1,45 @@
+version = 1
+SPDX-PackageName = "QuickLab"
+SPDX-PackageSupplier = "Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>"
+SPDX-PackageDownloadLocation = "https://github.com/jeff-d/QuickLab"
+
+[[annotations]]
+path = "aws/**"
+precedence = "closest"
+SPDX-FileCopyrightText = "© 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+[[annotations]]
+path = "docs/**.png"
+precedence = "closest"
+SPDX-FileCopyrightText = "© 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+[[annotations]]
+path = "**.md"
+precedence = "closest"
+SPDX-FileCopyrightText = "© 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+[[annotations]]
+path = ".gitignore"
+precedence = "closest"
+SPDX-FileCopyrightText = "© 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Vendored third-party Helm charts. These annotations must stay last: where several
+# paths match, the final one wins, and these override "aws/**".
+# Neither archive bundles a LICENSE file nor declares a license in its
+# Chart.yaml, so the upstream license is recorded here instead.
+
+[[annotations]]
+path = "aws/modules/cluster/sumo-opentelemetry-demo/charts/opentelemetry-demo-**.tgz"
+precedence = "closest"
+SPDX-FileCopyrightText = "The OpenTelemetry Authors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "aws/modules/cluster/sumo-opentelemetry-demo/charts/sumologic-**.tgz"
+precedence = "closest"
+SPDX-FileCopyrightText = "Sumo Logic, Inc."
+SPDX-License-Identifier = "Apache-2.0"

@@ -10,14 +10,28 @@ QuickLab's design philosophy aims to balance two competing goals:
 
 ## License
 
-QuickLab creates simple, monitored labs.
-Copyright (C) 2023 Jeffrey M. Deininger
+<!-- REUSE-IgnoreStart -->
+
+QuickLab creates simple, monitored labs.\
+© 2023 Jeffrey M. Deininger
+
+<!-- REUSE-IgnoreEnd -->
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+QuickLab follows the [REUSE Specification](https://reuse.software/spec/), so the copyright and license of every file in the repository is machine-readable. Each file's licensing is declared either in its own header or centrally in [REUSE.toml](../REUSE.toml), and the full text of every license used is in [LICENSES](../LICENSES/). Not everything is AGPL: the vendored Helm charts under `aws/modules/cluster/sumo-opentelemetry-demo/charts/` are Apache-2.0, from their upstream authors.
+
+To check compliance, install the [reuse tool](https://reuse.software/) and run this from the repository root:
+
+```
+reuse lint
+```
+
+A compliant repository ends its report with "Congratulations! Your project is compliant with version 3.3 of the REUSE Specification :-)".
 
 ## Project Notes
 
