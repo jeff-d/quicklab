@@ -7,11 +7,11 @@ Files: aws/*
 Copyright: 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
 License: AGPL-3.0-or-later
 
-Files: docs/quicklab*.png
+Files: docs/*.png
 Copyright: 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
 License: AGPL-3.0-or-later
 
-Files: README.md
+Files: *.md
 Copyright: 2023 Jeffrey M. Deininger <9385180+jeff-d@users.noreply.github.com>
 License: AGPL-3.0-or-later
 
